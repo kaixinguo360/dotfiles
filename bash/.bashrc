@@ -122,12 +122,3 @@ do
     source "$file"
 done
 
-
-# My Bashrc
-export PATH="$PATH:~/.bin:/opt/mssql-tools/bin"
-export CLASSPATH="$CLASSPATH:/home/kaixinguo/files/jar/mysql-connector-java-8.0.11.jar:."
-
-#/home/kaixinguo/.local/bin/doge
-. "/home/kaixinguo/.ca/myca.sh.env"
-. "/home/kaixinguo/.acme.sh/acme.sh.env"
-
