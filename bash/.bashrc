@@ -123,3 +123,9 @@ do
     source "$file"
 done
 
+# include ~/.bashrc.d/local/*.bashrc
+for file in ~/.bashrc.d/local/*.bashrc;
+do
+    source "$file"
+done
+
