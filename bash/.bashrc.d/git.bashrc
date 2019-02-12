@@ -1,4 +1,9 @@
 #Git Alias
+
+alias g='git'
+_completion_loader git
+complete -F _git g
+
 alias glog='git log'
 alias glg='git lg'
 alias gs='git status'
