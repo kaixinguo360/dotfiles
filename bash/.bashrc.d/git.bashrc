@@ -18,3 +18,12 @@ alias gfetch='git fetch'
 alias gcheck='git checkout'
 alias gcl='git clone'
 alias gback='git reset HEAD^'
+
+gupdate() {
+    if [[ "$@" == "" ]];then
+        ga && gcm "Update At `date +%F-%T`"
+    else
+        ga && gcm "$@"
+    fi
+}
+
