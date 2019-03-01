@@ -16,6 +16,7 @@ alias gpl='git pull'
 alias gph='git push'
 alias gfetch='git fetch'
 alias gcheck='git checkout'
+alias gdiff='git diff'
 alias gcl='git clone'
 alias gback='git reset HEAD^'
 
