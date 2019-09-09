@@ -5,7 +5,7 @@ _completion_loader git
 complete -F _git g
 
 alias glog='git log'
-alias glg='git lg'
+alias glg="git log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 alias gs='git status'
 alias gc='git commit'
 alias gcm='gc -m'
