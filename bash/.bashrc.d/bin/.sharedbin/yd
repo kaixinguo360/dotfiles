@@ -1,0 +1,97 @@
+#!/bin/bash
+#yd bash version
+#depends on jq
+
+keyfrom=youdaobashversion
+key=1655512721
+color1="\e[1;36m" 
+color2="\e[1;31m"
+color3="\e[1;33m"
+color4="\e[1;35m"
+reset="\e[0m"
+yd() {
+    if [[ $word = $(echo) ]]
+    then
+	return
+    fi
+    
+    tmp=$(curl -s --data-urlencode "q=$word" "http://fanyi.youdao.com/openapi.do?keyfrom=${keyfrom}&key=${key}&type=data&doctype=json&version=1.1&")
+    
+    us=$(jq '.basic."us-phonetic"' <<< $tmp)
+    uk=$(jq '.basic."uk-phonetic"' <<< $tmp)
+    tr=$(jq '.translation' <<< $tmp | jq '.[0]' | tr '"' ' ')
+    ex=$(jq '.basic.explains' <<< $tmp | grep '"' | tr '"' ' ' | tr "," ' ')
+    w1key=$(jq '.web' <<< $tmp | jq '.[0].key' | tr '"' ' ')
+    w2key=$(jq '.web' <<< $tmp | jq '.[1].key' | tr '"' ' ')    
+    w3key=$(jq '.web' <<< $tmp | jq '.[2].key' | tr '"' ' ')
+    w1val=$(jq '.web' <<< $tmp | jq '.[0].value' | xargs | tr "[" ' '| tr "]" ' ')
+    w2val=$(jq '.web' <<< $tmp | jq '.[1].value' | xargs | tr "[" ' '| tr "]" ' ')
+    w3val=$(jq '.web' <<< $tmp | jq '.[2].value' | xargs | tr "[" ' '| tr "]" ' ')    
+
+    if [[ $tr != "null" ]]
+    then
+	
+	echo -e "$color1  Translation:$reset"
+	echo "   $tr"
+	echo 
+    else
+	echo "  No query result"
+    fi
+    
+    wcount=$(wc -w <<< $word)
+    if [[ $wcount -eq 1 && $uk != "null" && $us != "null" ]]
+       then
+	   echo -ne "$color2  US:$reset" 
+	   echo -n "$us"
+	   echo -ne "$color2  UK:$reset"
+	   echo -n "$uk"
+	   echo 
+	   echo 
+    fi
+    
+    if [ -n "$ex" ]
+    then
+	echo -e "$color3  Word Explanation:$reset"
+	echo "$ex"
+	echo 
+    fi
+
+    if [[ $w1key != "null" || $w2key != "null" || $w3key != "null" ]]
+    then
+	echo -e "$color3  Web Reference:$reset"
+    fi
+
+    if [[ $w1key != "null" ]]
+    then	
+	echo -e "$color4  $w1key$reset"
+	echo  "  $w1val"
+    fi
+
+    if [[ $w2key != "null" ]]
+    then	
+	echo -e "$color4  $w2key$reset"
+	echo  "  $w2val"
+    fi
+
+    if [[ $w3key != "null" ]]
+    then	
+	echo -e "$color4  $w3key$reset"
+	echo  "  $w3val"
+    fi
+}
+
+#to the usage:$yd words 
+if [  -n "$1" ]
+then
+    word=$@
+    yd
+    exit
+fi
+
+#interactive
+while read -e -p "> " word
+do
+    history -s "$word"
+    yd
+done
+echo "bye"
