@@ -19,6 +19,7 @@ alias gcheck='git checkout'
 alias gdiff='git diff'
 alias gcl='git clone'
 alias gback='git reset HEAD^'
+alias gup='gupdate'
 
 gupdate() {
     if [[ "$@" == "" ]];then
