@@ -129,3 +129,4 @@ do
     source "$file"
 done
 
+PATH="$HOME/.bin:$HOME/.bashrc.d/bin:$PATH"
