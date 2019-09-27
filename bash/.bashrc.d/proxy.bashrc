@@ -14,7 +14,9 @@ function setproxy() {
     export HTTP_PROXY=$PROXY
     export https_proxy=$PROXY
     export HTTPS_PROXY=$PROXY
+    export ftp_proxy=$PROXY
+    export FTP_PROXY=$PROXY
 }
 function noproxy() {
-    unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY
+    unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY ftp_proxy FTP_PROXY
 }
