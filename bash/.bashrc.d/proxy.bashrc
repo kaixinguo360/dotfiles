@@ -46,4 +46,23 @@ function ssrt() {
     fi
 }
 
+# Test SSR
+function ssrtest() {
+    if [ "$SSR" != "" ];then
+        setproxy
+        ($SSR $@ &)
+        sleep 1
+        IP=$(getip)
+        if [ "$IP" != "" ];then
+            echo -e "\n  ## \033[32m测试成功\033[0m ##\n"
+            echo 'IP: '$IP
+        else
+            echo -e "\n  ## \033[31m测试失败\033[0m ##\n"
+            echo 'Test Failed!'
+        fi
+        ssrt
+    else
+        echo "SSR is not installed!"
+    fi
+}
 
