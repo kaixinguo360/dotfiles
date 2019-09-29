@@ -39,7 +39,7 @@ function ssr() {
 function ssrt() {
     if [ "$SSR" != "" ];then
         noproxy
-        ps -eo pgid,cmd|grep -v grep|grep $SSR|awk '{print $1}'|xargs -i pkill -g {}
+        kall $(ps -eo pid,cmd|grep -v grep|grep $SSR|awk '{print $1}')
         trap - EXIT
     else
         echo "SSR is not installed!"
