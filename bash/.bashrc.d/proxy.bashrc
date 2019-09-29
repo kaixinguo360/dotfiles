@@ -26,13 +26,24 @@ function noproxy() {
 
 # Start SSR
 function ssr() {
-    if [ "$SSR" = "" ];then
-        echo "SSR is not installed!"
-    else
+    if [ "$SSR" != "" ];then
         setproxy
         $SSR $@ &
+        trap "ssrt" EXIT
+    else
+        echo "SSR is not installed!"
     fi
 }
 
 # Stop SSR
-alias ssrt="noproxy;[ \"\$SSR\" != '' ]&&ps -eo pgid,cmd|grep -v grep|grep \$SSR|awk '{print \$1}'|xargs -i pkill -g {}"
+function ssrt() {
+    if [ "$SSR" != "" ];then
+        noproxy
+        ps -eo pgid,cmd|grep -v grep|grep $SSR|awk '{print $1}'|xargs -i pkill -g {}
+        trap - EXIT
+    else
+        echo "SSR is not installed!"
+    fi
+}
+
+
