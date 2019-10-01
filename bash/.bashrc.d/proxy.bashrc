@@ -56,13 +56,17 @@ function ssrtest() {
         if [ "$IP" != "" ];then
             echo -e "\n  ## \033[32m测试成功\033[0m ##\n"
             echo 'IP: '$IP
+            ssrt
+            return 0
         else
             echo -e "\n  ## \033[31m测试失败\033[0m ##\n"
             echo 'Test Failed!'
+            ssrt
+            return 1
         fi
-        ssrt
     else
         echo "SSR is not installed!"
+        return 1
     fi
 }
 
