@@ -24,6 +24,23 @@ function noproxy() {
     unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY ftp_proxy FTP_PROXY
 }
 
+# Test Proxy
+function proxytest() {
+    if [ "$1" != "" ];then
+        setproxy $1
+        IP=$(getip)
+        if [ "$IP" != "" ];then
+            echo -e "\n  ## \033[32m测试成功\033[0m ##\n"
+            echo 'IP: '$IP
+        else
+            echo -e "\n  ## \033[31m测试失败\033[0m ##\n"
+            echo 'Test Failed!'
+        fi
+    else
+        ssrtest
+    fi
+}
+
 # Start SSR
 function ssr() {
     if [ "$SSR" != "" ];then
@@ -56,17 +73,13 @@ function ssrtest() {
         if [ "$IP" != "" ];then
             echo -e "\n  ## \033[32m测试成功\033[0m ##\n"
             echo 'IP: '$IP
-            ssrt
-            return 0
         else
             echo -e "\n  ## \033[31m测试失败\033[0m ##\n"
             echo 'Test Failed!'
-            ssrt
-            return 1
         fi
+        ssrt
     else
         echo "SSR is not installed!"
-        return 1
     fi
 }
 
