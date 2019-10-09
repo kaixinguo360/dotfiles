@@ -6,3 +6,7 @@ stow
 wget
 curl
 dnsutils
+man
+make
+rsync
+tig
