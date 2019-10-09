@@ -9,3 +9,9 @@ alias se='sudo service'
 alias ca='cacaview'
 alias untar='tar -zxpf'
 alias reloadbashrc='source ~/.bashrc'
+alias updot='upgradedotfile'
+alias upgradedotfile='(cd $HOME/.bashrc.d; \
+git fetch --all && \
+git reset --hard origin/master && \
+git pull) && \
+reloadbashrc'

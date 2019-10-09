@@ -21,11 +21,22 @@ alias gcl='git clone'
 alias gback='git reset HEAD^'
 alias gup='gupdate'
 
-gupdate() {
-    if [[ "$@" == "" ]];then
-        ga && gcm "Update At `date +%F-%T`"
+function gupdate() {
+    if [[ -z "$1" || "${1:0:1}" = "-" ]];then
+        ga && gcm "Update At `date +%F-%T`" $@
     else
-        ga && gcm "$@"
+        MESG=$1
+        shift
+        ga && gcm "$MESG" $@
     fi
 }
 
+function guph() {
+    if [[ -z "$1" || "${1:0:1}" = "-" ]];then
+        gupdate
+    else
+        gupdate "$1"
+        shift
+    fi
+    gph $@
+}
