@@ -15,6 +15,9 @@ function setproxy() {
     export HTTPS_PROXY=$PROXY
     export ftp_proxy=$PROXY
     export FTP_PROXY=$PROXY
+    (git --version>/dev/null 2>&1) && \
+            git config --global http.proxy "$PROXY" && \
+            git config --global https.proxy "$PROXY"
 }
 
 alias proxy=setproxy
@@ -22,6 +25,9 @@ alias proxy=setproxy
 # Unset Proxy
 function noproxy() {
     unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY ftp_proxy FTP_PROXY
+    (git --version>/dev/null 2>&1) && \
+            git config --global --unset http.proxy && \
+            git config --global --unset https.proxy
 }
 
 # Start SSR
@@ -39,7 +45,7 @@ function ssr() {
 function ssrt() {
     if [ "$SSR" != "" ];then
         noproxy
-        kall $(ps -eo pid,cmd|grep -v grep|grep $SSR|awk '{print $1}')
+        kall $(ps -eo pid,cmd|grep -v grep|grep "$SSR"|awk '{print $1}')
         trap - EXIT
     else
         echo "SSR is not installed!"
