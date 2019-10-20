@@ -9,12 +9,22 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
     exit 0
 fi
 
-# Install
+# Read Package list
 PACKAGES=$(cat packages.list)
 echo "Content of the package.list:"
 echo "  "$(echo "$PACKAGES")
-CMD="apt install $PACKAGES -y"
-if [ -z "$PREFIX" ];then # Termux
-    CMD="sudo "$CMD
+
+# Install Packages
+if [ -z "$PREFIX" ];then
+    sudo apt update
+    sudo apt install $PACKAGES -y
+else # Termux
+    apt update
+    apt install wget -y
+    wget https://its-pointless.github.io/setup-pointless-repo.sh \
+        -O setup-pointless-repo.sh
+    bash setup-pointless-repo.sh
+    rm -f setup-pointless-repo.sh pointless.gpg
+    apt install $PACKAGES -y
 fi
-$CMD
+

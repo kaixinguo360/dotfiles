@@ -29,18 +29,16 @@ filetype plugin indent on    " required
 """"""""""""""""""""""""""""""""""""""""
 "      YouCompleteMe
 """"""""""""""""""""""""""""""""""""""""
-let g:ycm_show_diagnostics_ui = 0
+let g:ycm_show_diagnostics_ui = 1
 let g:ycm_add_preview_to_completeopt = 0
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_seed_identifiers_with_syntax = 1
-let g:ycm_max_num_candidates = 10
-let g:ycm_max_num_identifier_candidates = 10
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 let g:ycm_goto_buffer_command = 'horizontal-split'
 let g:ycm_key_invoke_completion = '<c-z>'
+let g:ycm_key_list_stop_completion = ['<C-y>', '<CR>']
 set completeopt=menu,menuone
 
-"inoremap <expr> <CR> pumvisible() ? "\<C-y><CR>" : "\<CR>"
 nnoremap <Leader>g :YcmCompleter GoTo<CR>
 noremap <c-z> <NOP>
 
@@ -52,12 +50,6 @@ let g:ycm_semantic_triggers = {
 " - Plugins End- "
     endif
 " - Plugins End- "
-
-""""""""""""""""""""""""""""""""""""""""
-"      HighLight
-""""""""""""""""""""""""""""""""""""""""
-"highlight PMenu ctermfg=0 ctermbg=242 guifg=black guibg=darkgrey
-"highlight PMenuSel ctermfg=242 ctermbg=8 guifg=darkgrey guibg=black
 
 """"""""""""""""""""""""""""""""""""""""
 "      AutoPair
@@ -103,6 +95,39 @@ inoremap ] <c-r>=ClosePair(']')<CR>
 "inoremap ` <c-r>=SamePair('`')<CR>
 
 """"""""""""""""""""""""""""""""""""""""
+"     Cabbrev
+""""""""""""""""""""""""""""""""""""""""
+
+fu! Cabbrev(key, value)
+  exe printf('cabbrev <expr> %s (getcmdtype() == ":" && getcmdpos() <= %d) ? %s : %s',
+    \ a:key, 1+len(a:key), string(a:value), string(a:key))
+endfu
+
+call Cabbrev('mmake', '!bash -ic mmake')
+
+
+""""""""""""""""""""""""""""""""""""""""
+"      Persistent undo
+""""""""""""""""""""""""""""""""""""""""
+
+" Put plugins and dictionaries in this dir (also on Windows)
+let vimDir = '$HOME/.vim'
+let &runtimepath.=','.vimDir
+
+" Keep undo history across sessions by storing it in a file
+if has('persistent_undo')
+    let myUndoDir = expand(vimDir . '/undodir')
+    " Create dirs
+    call system('mkdir ' . vimDir)
+    call system('mkdir ' . myUndoDir)
+
+    let &undodir = myUndoDir
+    set undofile
+    set undolevels=5000
+    set undoreload=10000
+endif
+
+""""""""""""""""""""""""""""""""""""""""
 "      MySettings
 """"""""""""""""""""""""""""""""""""""""
 set number
@@ -114,3 +139,6 @@ set shiftwidth=4
 set expandtab
 
 set pastetoggle=<F2>
+
+set incsearch
+

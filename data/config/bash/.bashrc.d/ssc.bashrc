@@ -1,8 +1,10 @@
-ssc() {
+ss() {
+    HOST=$1
+    shift
     if [[ $@ = "" ]];then
         for((;;))
         do
-            ssh kaixinguo -t 'screen -d s;screen -r s||screen -S s'
+            ssh $HOST -t 'screen -d s;screen -r s||screen -S s'
         if [ $? -eq 0 ];then
             break;
         else
@@ -10,6 +12,6 @@ ssc() {
         fi
         done
     else
-        ssh kaixinguo -t "bash -ic '($@)'"
+        ssh $HOST -t "bash -ic '($@)'"
     fi
 }

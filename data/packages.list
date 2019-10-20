@@ -10,3 +10,5 @@ man
 make
 rsync
 tig
+tree
+file
