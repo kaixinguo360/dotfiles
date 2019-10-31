@@ -1,7 +1,5 @@
 #!/bin/bash
-
-cd $(dirname $0)/../data
-configs=$(ls)
+. $(dirname $(realpath $0))/lib.sh
 
 # Show Help Info
 if [[ $1 = "-h" || $1 = "--help" ]];then
@@ -9,22 +7,13 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
     exit 0
 fi
 
-# Read Package list
-PACKAGES=$(cat packages.list)
-echo "Content of the package.list:"
-echo "  "$(echo "$PACKAGES")
-
-# Install Packages
-if [ -z "$PREFIX" ];then
-    sudo apt update
-    sudo apt install $PACKAGES -y
-else # Termux
-    apt update
-    apt install wget -y
-    wget https://its-pointless.github.io/setup-pointless-repo.sh \
-        -O setup-pointless-repo.sh
+# Termux
+if [ -n "$TERMUX" ];then
+    install_pkg wget bash
+    wget https://its-pointless.github.io/setup-pointless-repo.sh -O setup-pointless-repo.sh
     bash setup-pointless-repo.sh
     rm -f setup-pointless-repo.sh pointless.gpg
-    apt install $PACKAGES -y
 fi
+
+install_pkg $(pkg_list)
 

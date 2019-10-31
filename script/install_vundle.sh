@@ -1,4 +1,5 @@
 #!/bin/bash
+. $(dirname $(realpath $0))/lib.sh
 
 # Static Params
 DEPENDENCIES="build-essential cmake"
@@ -17,10 +18,10 @@ git clone $GIT_PARAMS https://github.com/ycm-core/YouCompleteMe $DIR/YouComplete
 vim +PluginUpdate +qall||exit
 
 # Compile YouCompleteMe
-if [ -z "$PREFIX" ];then # Termux
-    sudo apt install -y python3 python3-dev gcc $DEPENDENCIES ||exit
+if [ -n "$TERMUX" ];then
+    install_pkg python vim-python clang $DEPENDENCIES ||exit
 else
-    apt install -y python vim-python clang $DEPENDENCIES ||exit
+    install_pkg python3 python3-dev gcc $DEPENDENCIES ||exit
 fi
 python3 YouCompleteMe/install.py $YCM_PARAMS
 
