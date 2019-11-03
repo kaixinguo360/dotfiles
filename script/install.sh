@@ -1,9 +1,9 @@
 #!/bin/bash
 cd $(dirname $(realpath $0))
 
-./install_package.sh
-./install_config.sh
-./install_rgit.sh
+install/install_package.sh
+install/install_config.sh
+install/install_rgit.sh
 
 CUSTOM="../data/install.sh"
 if [ -f "$CUSTOM" ];then

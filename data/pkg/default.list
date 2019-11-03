@@ -12,5 +12,5 @@ rsync
 tig
 tree
 file
-@apt:dnsutils
+@!apk:dnsutils
 @apk:bind-tools

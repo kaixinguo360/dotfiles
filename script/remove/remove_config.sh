@@ -1,6 +1,7 @@
 #!/bin/bash
+. $(dirname $(realpath $0))/lib.sh
 
-cd $(dirname $(realpath $0))/../data/config
+cd $ROOT_PATH/../data/config
 configs=$(ls)
 
 # Show Help Info

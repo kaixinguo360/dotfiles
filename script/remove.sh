@@ -1,7 +1,7 @@
 #!/bin/bash
 cd $(dirname $(realpath $0))
 
-./remove_config.sh
+remove/remove_config.sh
 
 CUSTOM="../data/remove.sh"
 if [ -f "$CUSTOM" ];then
