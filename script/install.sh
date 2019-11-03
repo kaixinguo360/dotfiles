@@ -3,7 +3,6 @@ cd $(dirname $(realpath $0))
 
 install/install_package.sh
 install/install_config.sh
-install/install_rgit.sh
 
 CUSTOM="../data/install.sh"
 if [ -f "$CUSTOM" ];then

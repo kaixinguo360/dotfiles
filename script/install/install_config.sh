@@ -21,7 +21,7 @@ do
         $CUSTOM
     else
         echo "No custom script found, use default script."
-        stow $dir -t $HOME
+        install_config $dir
     fi
     [ "$?" != "0" ] && { echo "an error occured while installing config files of '$dir', installation stopped."; exit 1; }
     echo "Config files of '$dir' is ready"

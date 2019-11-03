@@ -7,6 +7,9 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
     exit 0
 fi
 
+# Install rsync
+install_pkg rsync
+
 # Read Package list
 cd && wget -O get-rgit.sh https://github.com/kaixinguo360/Rgit/raw/master/sh/get-rgit.sh && chmod +x get-rgit.sh
 

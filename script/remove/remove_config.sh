@@ -22,7 +22,7 @@ do
         $CUSTOM
     else
         echo "No custom script found, use default script."
-        stow -D $dir -t $HOME
+        remove_config $dir
     fi
     [ "$?" != "0" ] && { echo "An error occured while removing config files of '$dir', Remove stopped."; exit 1; }
     echo "Config files of '$dir' is removed"

@@ -1,0 +1,6 @@
+@!termux:gcc
+@!termux:gcc-multilib
+@!termux:g++-multilib
+@termux:clang
+make
+tig
