@@ -1,7 +1,7 @@
 #!/bin/bash
 cd $(dirname $(realpath $0))
 
-install/install_package.sh
+install/install_tool.sh default.list
 install/install_config.sh
 
 CUSTOM="../data/install.sh"

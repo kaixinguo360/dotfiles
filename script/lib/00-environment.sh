@@ -4,8 +4,8 @@
 [[ -z "$TERMUX" && $UID -ne 0 ]] && SUDO='sudo'
 
 # Get Package Manager
-PKG="unkown"
-[ -n "$(command -v apk)" ] && PKG="apk"
-[ -n "$(command -v apt)" ] && PKG="apt"
-[ -n "$TERMUX" ] && PKG="termux"
+PMG="unkown"
+[ -n "$(command -v apk)" ] && PMG="apk"
+[ -n "$(command -v apt)" ] && PMG="apt"
+[ -n "$TERMUX" ] && PMG="termux"
 

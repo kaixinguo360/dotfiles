@@ -19,9 +19,9 @@ vim +PluginUpdate +qall||exit
 
 # Compile YouCompleteMe
 if [ -n "$TERMUX" ];then
-    install_pkg python vim-python clang $DEPENDENCIES ||exit
+    need python vim-python clang $DEPENDENCIES ||exit
 else
-    install_pkg python3 python3-dev gcc $DEPENDENCIES ||exit
+    need python3 python3-dev gcc $DEPENDENCIES ||exit
 fi
 python3 YouCompleteMe/install.py $YCM_PARAMS
 
