@@ -4,32 +4,39 @@ function has() {
     do
         [ -z "$(command -v $CMD)" ] && return 1
     done
-    echo yes
+    return 0
 }
+function not_has() { if has $@; then return 1; else return 0; fi; }
 
 # Is Package Installed
 function is_installed() {
     for CMD in $@
     do
         [ "$PMG" = "apt" -o "$PMG" = "termux" ] && [ -z "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
-        [ "$PMG" = "apk" ] && [ -z "$(apk info 2>/dev/null|grep -E '^$CMD$')" ] && return 1
+        [ "$PMG" = "apk" ] && [ -z "$(apk info 2>/dev/null|sed -n '/^'$CMD'$/p')" ] && return 1
     done
-    echo yes
+    return 0
 }
+function not_installed() { if is_installed $@; then return 1; else return 0; fi; }
 
 # Ensure specified tools has been installed
 function need() {
     install_tool $@
 }
 
+# Has Command
+function only() {
+    for CMD in $@
+    do
+        [ "$PMG" = "$CMD" ] && return 0
+    done
+    echo "Unsupported package manager '$PMG'" >&2
+    exit 1
+}
+
 # Get Packages List
 function pkg_list() {
-    if [ -n "$1" ];then
-        LIST="$1"
-    else
-        LIST="default.list"
-    fi
-    LIST_PATH="$ROOT_PATH/../data/pkg/$LIST"
+    LIST_PATH="$ROOT_PATH/../data/pkg/$1"
     [ ! -f $LIST_PATH ] && return 1
     cat "$LIST_PATH"|sed 's/#.*$//'|sed -n '/^[^@].*$/p; /^@!.*:.*$/p; /^@'$PMG':.*$/p'|sed '/^@!'$PMG':.*$/d'|sed 's/@[^:]*://'
 }
@@ -45,17 +52,23 @@ function install_pkg() {
     bash -c "$CMD"
 }
 
+function err() {
+    echo "an error occured, script stopped."
+    exit 1
+}
+
 # Install Tools
 function install_tool() {
     PKGS=''
     for TOOL in $@
     do
         LIST=$(pkg_list $TOOL)
-        [ $? -eq 0 ] && { [ -z "$(is_installed $LIST)" ] && install_pkg $LIST; continue; }
+        [ $? -eq 0 ] && { not_installed $LIST && { install_pkg $LIST || err; }; continue; }
         CMD_PATH="$ROOT_PATH/install/install_$TOOL"
-        [ -f "$CMD_PATH" ] && { [ -z "$(has $TOOL)" ] && $CMD_PATH; continue; }
-        [ -z "$(is_installed $TOOL)" ] && { PKGS="$PKGS $TOOL"; continue; }
+        [ -f "$CMD_PATH" ] && { not_has $TOOL && { $CMD_PATH || err; }; continue; }
+        not_installed $TOOL && { PKGS="$PKGS $TOOL"; continue; }
     done
-    [ -n "$PKGS" ] && install_pkg $PKGS
+    [ -n "$PKGS" ] && { install_pkg $PKGS || err; }
+    return 0
 }
 

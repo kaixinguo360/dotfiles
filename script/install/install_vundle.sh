@@ -1,6 +1,10 @@
 #!/bin/bash
 . $(dirname $(realpath $0))/lib.sh
 
+# Check Dependencies
+[ -d "$HOME/.vim/bundle/Vundle.vim" ] && [ "$1" != "-f" ] && echo 'vundle installed' && exit 0
+need git vim
+
 # Static Params
 DEPENDENCIES="build-essential cmake"
 YCM_PARAMS="--clang-completer"
