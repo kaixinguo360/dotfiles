@@ -1,5 +1,5 @@
 # Load libs
-ROOT_PATH=$(dirname $(realpath $0))/..
+ROOT_PATH=..
 for LIB in $ROOT_PATH/lib/??-*.sh;
 do
     . "$LIB"

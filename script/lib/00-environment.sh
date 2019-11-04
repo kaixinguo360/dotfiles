@@ -9,3 +9,6 @@ PMG="unkown"
 [ -n "$(command -v apt)" ] && PMG="apt"
 [ -n "$TERMUX" ] && PMG="termux"
 
+# Default Arguments
+[ -z "$DEFAULT_PASSWORD" ] && DEFAULT_PASSWORD=1234567
+[ -z "$DEFAULT_HOST_NAME" ] && DEFAULT_HOST_NAME=localhost

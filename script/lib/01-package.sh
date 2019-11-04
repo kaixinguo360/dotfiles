@@ -60,6 +60,7 @@ function err() {
 # Install Tools
 function install_tool() {
     PKGS=''
+    export IN_SCRIPT='y'
     for TOOL in $@
     do
         LIST=$(pkg_list $TOOL)
@@ -69,6 +70,15 @@ function install_tool() {
         not_installed $TOOL && { PKGS="$PKGS $TOOL"; continue; }
     done
     [ -n "$PKGS" ] && { install_pkg $PKGS || err; }
+    unset IN_SCRIPT
     return 0
+}
+
+# Start Service
+function start_service() {
+    only apt
+    echo "Starting $1"
+    $SUDO service $1 stop >/dev/null 2>&1
+    $SUDO service $1 start >/dev/null
 }
 
