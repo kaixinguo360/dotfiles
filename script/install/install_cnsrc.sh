@@ -8,7 +8,7 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
 fi
 
 # Check Dependencies
-only apt termux apk
+only_support $1 apt termux apk
 
 # apt
 [ "$PMG" = "apt" ] && {

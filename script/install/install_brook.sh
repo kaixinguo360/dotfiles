@@ -8,7 +8,7 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
 fi
 
 # Check Dependencies
-has brook && [ "$1" != "-f" ] && echo 'bbr installed' && exit 0
+has brook && [ "$1" != "-f" ] && echo 'brook installed' && exit 0
 need curl
 
 # Download
@@ -19,4 +19,7 @@ URL="https://github.com/txthinking/brook/releases/download/v20190601/brook_linux
 
 $SUDO curl -fsSL $REMOTE -o $LOCAL/brook
 $SUDO chmod +x $LOCAL/brook
+
+echo "Brook has been installed to $LOCAL/brook"
+echo "See 'brook --help' to read help info."
 

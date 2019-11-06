@@ -1,39 +1,3 @@
-# Has Command
-function has() {
-    for CMD in $@
-    do
-        [ -z "$(command -v $CMD)" ] && return 1
-    done
-    return 0
-}
-function not_has() { if has $@; then return 1; else return 0; fi; }
-
-# Is Package Installed
-function is_installed() {
-    for CMD in $@
-    do
-        [ "$PMG" = "apt" -o "$PMG" = "termux" ] && [ -z "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
-        [ "$PMG" = "apk" ] && [ -z "$(apk info 2>/dev/null|sed -n '/^'$CMD'$/p')" ] && return 1
-    done
-    return 0
-}
-function not_installed() { if is_installed $@; then return 1; else return 0; fi; }
-
-# Ensure specified tools has been installed
-function need() {
-    install_tool $@
-}
-
-# Has Command
-function only() {
-    for CMD in $@
-    do
-        [ "$PMG" = "$CMD" ] && return 0
-    done
-    echo "Unsupported package manager '$PMG'" >&2
-    exit 1
-}
-
 # Get Packages List
 function pkg_list() {
     LIST_PATH="$ROOT_PATH/../data/pkg/$1"
@@ -43,40 +7,55 @@ function pkg_list() {
 
 # Install Packages
 function install_pkg() {
-    CMD=''
-    [ "$PMG" = "apt" -o "$PMG" = "termux" ] && \
-        { [ -z "$IS_UPDATED" ] && { CMD="$SUDO apt update &&"; IS_UPDATED='y'; }; CMD="$CMD $SUDO apt install -y $@"; }
-    [ "$PMG" = "apk" ] && CMD="$SUDO apk add --no-cache $@"
+    is_installed $@ && { echo "Packages '$@' installed"; return 0; }
     echo Install Packages: $@
-    echo $CMD
-    bash -c "$CMD"
+    [ "$PMG" = "apt" -o "$PMG" = "termux" ] && {
+        [ -z "$IS_UPDATED" ] && { $SUDO apt update -q; export IS_UPDATED='y'; }
+        DEBIAN_FRONTEND=noninteractive $SUDO apt install \
+            -o Dpkg::Options::="--force-confdef" \
+            -o Dpkg::Options::="--force-confold" \
+            -yq $@
+    }
+    [ "$PMG" = "apk" ] && {
+        $SUDO apk add --no-cache $@
+    }
 }
 
-function err() {
-    echo "an error occured, script stopped."
-    exit 1
+function install_list() {
+    LIST=$(pkg_list $1) || { echo "No such list '$1'"; return 1; }
+    is_installed $LIST && { echo "List '$1' installed"; return 0; }
+    install_pkg $LIST
+}
+
+function install_script() {
+    CMD_PATH="$ROOT_PATH/install/install_$1"; shift
+    [ -f "$CMD_PATH" ] || { echo "No such script '$1'"; return 1; }
+    $CMD_PATH $@
 }
 
 # Install Tools
 function install_tool() {
-    PKGS=''
-    export IN_SCRIPT='y'
-    for TOOL in $@
+    [ "$1" = "-i" ] && { INTERACTIVE='y'; shift; } || { INTERACTIVE=''; }
+    TOOL="$1"; shift
+    [ -z "$TOOL" ] && return 0
+    [ -z "$INTERACTIVE" ] && export IN_SCRIPT='y'
+        [ "${TOOL##*.}" = "$TOOL" ] && { install_pkg $TOOL; return; }
+        [ "${TOOL##*.}" = "list" ] && { install_list $TOOL; return; }
+        [ "${TOOL##*.}" = "sh" ] && { install_script $TOOL $@; return; }
+    [ -z "$INTERACTIVE" ] && unset IN_SCRIPT
+}
+
+# Ensure specified tools has been installed
+function need() {
+    for TOOL in "$@"
     do
-        LIST=$(pkg_list $TOOL)
-        [ $? -eq 0 ] && { not_installed $LIST && { install_pkg $LIST || err; }; continue; }
-        CMD_PATH="$ROOT_PATH/install/install_$TOOL"
-        [ -f "$CMD_PATH" ] && { not_has $TOOL && { $CMD_PATH || err; }; continue; }
-        not_installed $TOOL && { PKGS="$PKGS $TOOL"; continue; }
+        install_tool $TOOL || { echo "Dependent tool '$TOOL' installation failed"; exit 1; }
     done
-    [ -n "$PKGS" ] && { install_pkg $PKGS || err; }
-    unset IN_SCRIPT
-    return 0
 }
 
 # Start Service
 function start_service() {
-    only apt
+    only_support apt
     echo "Starting $1"
     $SUDO service $1 stop >/dev/null 2>&1
     $SUDO service $1 start >/dev/null

@@ -8,13 +8,14 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
 fi
 
 # Check Dependencies
-only apt
+only_support $1 apt
+not_support_docker $1
 [ -n "$(lsmod|grep bbr)" ] && [ "$1" != "-f" ] && echo 'bbr installed' && exit 0
 need curl
 
 # Download && Run script.sh
 cd \
     && curl -fsSL https://raw.githubusercontent.com/teddysun/across/master/bbr.sh -o bbr.sh \
-    && $SUDO sh bbr.sh \
-    && rm -f bbr.sh
+    && $SUDO sh bbr.sh
+rm -f bbr.sh
 

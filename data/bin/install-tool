@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Show Help Info
+if [[ $1 = "" || $1 = "-h" || $1 = "--help" ]];then
+    echo -e "Usage: ${0##*/} [-i] [TOOL] [OPTION]..."
+    echo -e "Install tool"
+    exit 0
+fi
+
+cd $(dirname $(realpath $0))/../../script
+[ "$1" = "-i" ] && { INTERACTIVE='-i'; shift; } || { INTERACTIVE=''; }
+install/install_tool.sh $INTERACTIVE "$@"

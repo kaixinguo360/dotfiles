@@ -8,7 +8,7 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
 fi
 
 # Check Dependencies
-only apt
+only_support $1 apt
 has nginx mysql php && [ "$1" != "-f" ] && echo 'lnmp installed' && exit 0
 [ "$1" = "-f" ] && shift
 
@@ -26,7 +26,7 @@ DEFAULT_NGINX_CONF="$ROOT_PATH/../data/static/nginx_site_config"
 # Install
 $SUDO debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_PASSWORD"
 $SUDO debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_PASSWORD"
-install_tool lnmp.list
+install_tool lnmp.list || { echo "LNMP installation failed"; exit 1; }
 
 # Config MySQL
 # run mysql_secure_installation (optional)

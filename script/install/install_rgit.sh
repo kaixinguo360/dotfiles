@@ -14,6 +14,5 @@ need rsync wget
 # Download && Run script.sh
 cd \
     && wget -O get-rgit.sh https://github.com/kaixinguo360/Rgit/raw/master/sh/get-rgit.sh \
-    && chmod +x get-rgit.sh \
-    && $SUDO ./get-rgit.sh \
-    && rm get-rgit.sh
+    && $SUDO sh get-rgit.sh
+rm -f get-rgit.sh
