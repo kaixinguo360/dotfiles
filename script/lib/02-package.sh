@@ -1,16 +1,10 @@
-# Get Packages List
-function pkg_list() {
-    LIST_PATH="$ROOT_PATH/../data/pkg/$1"
-    [ ! -f $LIST_PATH ] && return 1
-    cat "$LIST_PATH"|sed 's/#.*$//'|sed -n '/^[^@].*$/p; /^@!.*:.*$/p; /^@'$PMG':.*$/p'|sed '/^@!'$PMG':.*$/d'|sed 's/@[^:]*://'
-}
-
 # Install Packages
 function install_pkg() {
-    [ "$1" = "-f" ] && shift || {
+    [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
+    [ -z "$1" ] && return 0
+    [ -z "$FORCE" ] && {
         is_installed $@ && { echo "Packages '$@' installed"; return 0; }
     }
-    [ -z "$1" ] && return 0
     echo Install Packages: $@
     [ "$PMG" = "termux" ] && install_pointless
     [ "$PMG" = "apt" -o "$PMG" = "termux" ] && {
@@ -18,6 +12,7 @@ function install_pkg() {
         DEBIAN_FRONTEND=noninteractive $SUDO apt install \
             -o Dpkg::Options::="--force-confdef" \
             -o Dpkg::Options::="--force-confold" \
+            --no-install-recommends \
             -yq $@
         return
     }
@@ -28,13 +23,16 @@ function install_pkg() {
 }
 
 function install_list() {
-    [ "$1" = "-f" ] && { FORCE='-f'; shift; }
+    [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
     [ -z "$1" ] && return 0
-    LIST=$(pkg_list $1) || { echo "No such list '$1'"; return 1; }
+    has_list $1 || { echo "No such list '$1'"; return 1; }
+    PKGS=$(list_pkgs $1)
     [ -z "$FORCE" ] && {
-        is_installed $LIST && { echo "List '$1' installed"; return 0; }
+        is_installed $PKGS && { echo "List '$1' installed"; return 0; }
     }
-    install_pkg $FORCE $LIST
+    (cd;list_pre $1|$SUDO sh)||return 1
+    install_pkg $FORCE $PKGS||return 1
+    (cd;list_post $1|$SUDO sh)||return 1
 }
 
 function install_script() {

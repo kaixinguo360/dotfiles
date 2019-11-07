@@ -1,0 +1,7 @@
+@apt:python
+@apk:python2
+@termux:python2
+> @!termux: curl -# https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+    && python2 get-pip.py \
+    && rm -r get-pip.py
+> pip2 install --upgrade pip 

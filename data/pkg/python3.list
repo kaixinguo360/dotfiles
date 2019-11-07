@@ -1,0 +1,7 @@
+@apt:python3
+@apk:python3
+@termux:python
+> @apt: curl -# https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+    && python3 get-pip.py \
+    && rm -r get-pip.py
+> pip3 install --upgrade pip 
