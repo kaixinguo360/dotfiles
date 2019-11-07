@@ -1,6 +1,8 @@
 # Alias
 alias c=clear
 alias py=python3
+alias py3=python3
+alias py2=python2
 alias cd..='cd ..'
 alias sl='sl -e'
 alias dul='sudo du -ha --max-depth=1'
