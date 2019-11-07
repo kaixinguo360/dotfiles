@@ -7,24 +7,34 @@ function pkg_list() {
 
 # Install Packages
 function install_pkg() {
-    is_installed $@ && { echo "Packages '$@' installed"; return 0; }
+    [ "$1" = "-f" ] && shift || {
+        is_installed $@ && { echo "Packages '$@' installed"; return 0; }
+    }
+    [ -z "$1" ] && return 0
     echo Install Packages: $@
+    [ "$PMG" = "termux" ] && install_pointless
     [ "$PMG" = "apt" -o "$PMG" = "termux" ] && {
         [ -z "$IS_UPDATED" ] && { $SUDO apt update -q; export IS_UPDATED='y'; }
         DEBIAN_FRONTEND=noninteractive $SUDO apt install \
             -o Dpkg::Options::="--force-confdef" \
             -o Dpkg::Options::="--force-confold" \
             -yq $@
+        return
     }
     [ "$PMG" = "apk" ] && {
         $SUDO apk add --no-cache $@
+        return
     }
 }
 
 function install_list() {
+    [ "$1" = "-f" ] && { FORCE='-f'; shift; }
+    [ -z "$1" ] && return 0
     LIST=$(pkg_list $1) || { echo "No such list '$1'"; return 1; }
-    is_installed $LIST && { echo "List '$1' installed"; return 0; }
-    install_pkg $LIST
+    [ -z "$FORCE" ] && {
+        is_installed $LIST && { echo "List '$1' installed"; return 0; }
+    }
+    install_pkg $FORCE $LIST
 }
 
 function install_script() {
@@ -39,8 +49,8 @@ function install_tool() {
     TOOL="$1"; shift
     [ -z "$TOOL" ] && return 0
     [ -z "$INTERACTIVE" ] && export IN_SCRIPT='y'
-        [ "${TOOL##*.}" = "$TOOL" ] && { install_pkg $TOOL; return; }
-        [ "${TOOL##*.}" = "list" ] && { install_list $TOOL; return; }
+        [ "${TOOL##*.}" = "$TOOL" ] && { install_pkg $@ $TOOL; return; }
+        [ "${TOOL##*.}" = "list" ] && { install_list $@ $TOOL; return; }
         [ "${TOOL##*.}" = "sh" ] && { install_script $TOOL $@; return; }
     [ -z "$INTERACTIVE" ] && unset IN_SCRIPT
 }
@@ -59,5 +69,16 @@ function start_service() {
     echo "Starting $1"
     $SUDO service $1 stop >/dev/null 2>&1
     $SUDO service $1 start >/dev/null
+}
+
+# Install Pointless source
+function install_pointless() {
+    [[ -n "$NEED_POINTLESS" ]] && {
+        unset NEED_POINTLESS
+        need wget bash 'apt -f'
+        wget https://its-pointless.github.io/setup-pointless-repo.sh -O setup-pointless-repo.sh
+        bash setup-pointless-repo.sh
+        rm -f setup-pointless-repo.sh pointless.gpg
+    }
 }
 

@@ -8,15 +8,5 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
     exit 0
 fi
 
-[ "$1" = "-i" ] && { INTERACTIVE='-i'; shift; } || { INTERACTIVE=''; }
-
-# Termux
-[[ -n "$@" && -n "$NEED_POINTLESS" ]] && {
-    need wget bash apt
-    wget https://its-pointless.github.io/setup-pointless-repo.sh -O setup-pointless-repo.sh
-    bash setup-pointless-repo.sh
-    rm -f setup-pointless-repo.sh pointless.gpg
-}
-
-install_tool $INTERACTIVE $@ || { echo "An error occured, stop installing of '$@'"; }
+install_tool $@ || { echo "An error occured, stop installing of '$@'"; }
 

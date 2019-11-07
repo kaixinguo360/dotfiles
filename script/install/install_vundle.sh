@@ -19,7 +19,7 @@ GIT_PARAMS="--branch master --depth 1"
 git clone $GIT_PARAMS https://github.com/VundleVim/Vundle.vim.git $DIR/Vundle.vim
 git clone $GIT_PARAMS https://github.com/ycm-core/YouCompleteMe $DIR/YouCompleteMe
 (cd $DIR/YouCompleteMe;git submodule update --init --recursive)
-vim +PluginUpdate +qall||exit
+yes|vim +PluginUpdate +qall||exit
 
 # Compile YouCompleteMe
 if [ -n "$TERMUX" ];then

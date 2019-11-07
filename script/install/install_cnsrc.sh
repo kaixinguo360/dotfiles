@@ -14,24 +14,8 @@ only_support $1 apt termux apk
 [ "$PMG" = "apt" ] && {
 cd /etc/apt
 $SUDO cp sources.list sources.list.bak
-$SUDO cat > sources.list << HERE
-deb http://mirrors.aliyun.com/ubuntu/ xenial main
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial main
-
-deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main
-
-deb http://mirrors.aliyun.com/ubuntu/ xenial universe
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial universe
-deb http://mirrors.aliyun.com/ubuntu/ xenial-updates universe
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates universe
-
-deb http://mirrors.aliyun.com/ubuntu/ xenial-security main
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main
-deb http://mirrors.aliyun.com/ubuntu/ xenial-security universe
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security universe
-HERE
-$SUDO apt update -qq
+$SUDO sed -i 's@\(deb-*s*r*c*\) \+\(https*://[^ ]*\) \+\([^ ]*\) \+\([^ ]*\)\(.*\)@\1 http://mirrors.aliyun.com/ubuntu/ \3 \4\5@' sources.list
+$SUDO apt update -q
 echo "Change apt source to 'mirrors.aliyun.com'"
 exit 0
 }
@@ -42,7 +26,7 @@ cd $PREFIX/etc/apt
 cp sources.list sources.list.bak
 sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirrors.tuna.tsinghua.edu.cn/termux stable main@' \
     $PREFIX/etc/apt/sources.list
-apt update -qq
+apt update -q
 echo "Change termux source to 'mirrors.tuna.tsinghua.edu.cn'"
 exit 0
 }

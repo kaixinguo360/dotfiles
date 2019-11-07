@@ -124,9 +124,11 @@ do
 done
 
 # include ~/.bashrc.d/local/*.bashrc
+[ -n "$(ls ~/.bashrc.d/local/*.bashrc 2>/dev/null)" ] && {
 for file in ~/.bashrc.d/local/*.bashrc;
 do
     source "$file"
 done
+}
 
 PATH="$HOME/.bin:$(realpath $HOME/.bashrc.d)/../../../bin:$PATH"
