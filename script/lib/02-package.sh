@@ -43,14 +43,21 @@ function install_script() {
 
 # Install Tools
 function install_tool() {
+    local INTERACTIVE BACKUP
+    BACKUP=$IN_SCRIPT
     [ "$1" = "-i" ] && { INTERACTIVE='y'; shift; } || { INTERACTIVE=''; }
     TOOL="$1"; shift
     [ -z "$TOOL" ] && return 0
     [ -z "$INTERACTIVE" ] && export IN_SCRIPT='y'
-        [ "${TOOL##*.}" = "$TOOL" ] && { install_pkg $@ $TOOL; return; }
-        [ "${TOOL##*.}" = "list" ] && { install_list $@ $TOOL; return; }
-        [ "${TOOL##*.}" = "sh" ] && { install_script $TOOL $@; return; }
-    [ -z "$INTERACTIVE" ] && unset IN_SCRIPT
+        if [ "${TOOL##*.}" = "$TOOL" ];then
+            install_pkg $@ $TOOL; RET=$?;
+        elif [ "${TOOL##*.}" = "list" ];then
+            install_list $@ $TOOL; RET=$?;
+        elif [ "${TOOL##*.}" = "sh" ];then
+            install_script $TOOL $@; RET=$?;
+        fi
+    [ -z "$INTERACTIVE" ] && export IN_SCRIPT=$BACKUP
+    return $RET
 }
 
 # Ensure specified tools has been installed

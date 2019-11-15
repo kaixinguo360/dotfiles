@@ -12,7 +12,7 @@ PMG="unkown"
 
 # Default Arguments
 [ -z "$DEFAULT_PASSWORD" ] && DEFAULT_PASSWORD=1234567
-[ -z "$DEFAULT_HOST_NAME" ] && DEFAULT_HOST_NAME=localhost
+[ -z "$DEFAULT_HOST_NAME" ] && DEFAULT_HOST_NAME=$HOSTNAME
 
 # Has Command
 function has() {
