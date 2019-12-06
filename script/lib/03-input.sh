@@ -1,9 +1,12 @@
 # Read Input
 function read_input() {
-    echo "script: ${0##*/}"
-    echo "----------------"
-    echo " Read Arguments "
-    echo "----------------"
+    [ -z "$read_input_run" ] && {
+        echo "script: ${0##*/}"
+        echo "----------------"
+        echo " Read Arguments "
+        echo "----------------"
+        read_input_run=y
+    }
     while [ -n "$1" ]
     do
         NAME="$1"; shift
