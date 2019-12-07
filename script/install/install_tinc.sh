@@ -10,83 +10,114 @@ fi
 # Check Dependencies
 only_support $1 apt apk
 has tincd && [ "$1" != "-f" ] && echo 'tinc installed' && exit 0
+has scp ssh || { echo "Can't find 'scp' and 'ssh' command, please install them."; exit 1; }
 [ "$1" = "-f" ] && shift
 
 # Read Input
 read_input \
     TINC_VNET_NAME  str 'Vnet name' 'mynet' \
-    TINC_VNET_ADDR  str 'Vnet address' '192.168.1.0/24' \
+    TINC_VNET_ADDR  str 'Vnet address' '10.0.0.0/24' \
     TINC_VHOST_NAME str 'Vhost name' $DEFAULT_HOST_NAME \
-    TINC_VHOST_ADDR str 'Vhost address' '192.168.1.1/32' \
-    TINC_IS_CONNECT bool 'Connect to other host?' n
-[ "$TINC_IS_CONNECT" == 'y' ] && read_input \
-    TINC_CONNECT_TO str 'Address of host to connect' $DEFAULT_HOST_NAME
-[ "$TINC_IS_CONNECT" != 'y' ] && read_input \
-    TINC_LOCAL_ADDR str 'Address of this host' '127.0.0.1'
+    TINC_VHOST_ADDR str 'Vhost address' '10.0.0.1'
+TINC_VHOST_ADDR=$TINC_VHOST_ADDR/32
 
-# Install
+read_input TINC_IS_SYNC bool 'Sync configs from other host?' y
+[ "$TINC_IS_SYNC" == 'y' ] && read_input \
+    TINC_SYNC_FROM str 'Address of host to sync' 'k'
+
+read_input TINC_IS_FIXED_ADDR bool 'Is this host has fixed address?' n
+[ "$TINC_IS_FIXED_ADDR" == 'y' ] && read_input \
+    TINC_FIXED_ADDR str 'Fixed address of this host' '127.0.0.1'
+
+###############
+# Install tinc
+###############
 install_tool tinc || { echo "tinc installation failed"; exit 1; }
-
-## Config Tincd ##
 
 TINC_CONF_ROOT=/etc/tinc
 NET_ROOT=$TINC_CONF_ROOT/$TINC_VNET_NAME
 
-# Create config directory
+###############
+# Sync hosts
+###############
+$SUDO rm -rf $NET_ROOT/hosts
 $SUDO mkdir -p $NET_ROOT/hosts
-$SUDO rm -f $NET_ROOT/hosts/*
+$SUDO chown $USER -R $NET_ROOT
+[ "$TINC_IS_SYNC" == 'y' ] && {
+echo -n "Syncing configs... "
+scp -q $TINC_SYNC_FROM:/etc/tinc/$TINC_VNET_NAME/hosts/* $NET_ROOT/hosts \
+    && echo 'done.' || exit 1
+}
+
+###############
+# Basic Config
+###############
 
 # Create tinc-up
-$SUDO touch $NET_ROOT/tinc-up
-$SUDO chmod 777 $NET_ROOT/tinc-up
 cat > $NET_ROOT/tinc-up << HERE
 #!/bin/sh
 ip link set \$INTERFACE up
 ip addr add $TINC_VHOST_ADDR dev \$INTERFACE
 ip route add $TINC_VNET_ADDR dev \$INTERFACE
 HERE
-$SUDO chmod 755 $NET_ROOT/tinc-up
+chmod +x $NET_ROOT/tinc-up
 
 # Create tinc-down
-$SUDO touch $NET_ROOT/tinc-down
-$SUDO chmod 777 $NET_ROOT/tinc-down
 cat > $NET_ROOT/tinc-down << HERE
 #!/bin/sh
 ip route del $TINC_VNET_ADDR dev \$INTERFACE
 ip addr del $TINC_VHOST_ADDR dev \$INTERFACE
 ip link set \$INTERFACE down
 HERE
-$SUDO chmod 755 $NET_ROOT/tinc-down
+chmod +x $NET_ROOT/tinc-down
 
 # Create tinc.conf
-$SUDO touch $NET_ROOT/tinc.conf
-$SUDO chmod 777 $NET_ROOT/tinc.conf
 cat > $NET_ROOT/tinc.conf << HERE
 Name = $TINC_VHOST_NAME
 Device = /dev/net/tun
 HERE
-[ "$TINC_IS_CONNECT" == 'y' ] && \
-cat >> $NET_ROOT/tinc.conf << HERE
-ConnectTo = $TINC_CONNECT_TO
-HERE
-$SUDO chmod 644 $NET_ROOT/tinc.conf
+[ "$TINC_IS_SYNC" == 'y' ] && (
+cd $NET_ROOT/hosts
+rm -f $TINC_VHOST_NAM
+grep -e '^\s*Address\s*=' * -l | \
+    awk '{print "ConnectTo = "$1}' | \
+    cat >> $NET_ROOT/tinc.conf
+)
+
+###############
+# Config hosts
+###############
 
 # Create hosts/* config
-$SUDO touch $NET_ROOT/hosts/$TINC_VHOST_NAME
-$SUDO chmod 777 $NET_ROOT/hosts/$TINC_VHOST_NAME
-[ "$TINC_IS_CONNECT" != 'y' ] && \
-cat > $NET_ROOT/hosts/$TINC_VHOST_NAME << HERE
-Address = $TINC_LOCAL_ADDR
-HERE
 cat > $NET_ROOT/hosts/$TINC_VHOST_NAME << HERE
 Port = 655
 Subnet = $TINC_VHOST_ADDR
 HERE
-$SUDO chmod 644 $NET_ROOT/hosts/$TINC_VHOST_NAME
+[ "$TINC_IS_FIXED_ADDR" == 'y' ] && \
+cat >> $NET_ROOT/hosts/$TINC_VHOST_NAME << HERE
+Address = $TINC_FIXED_ADDR
+HERE
 
-# Create RSA key
-$SUDO rm -f $NET_ROOT/rsa_key.priv
+# Generate RSA key
+rm -f $NET_ROOT/rsa_key.priv
 yes|$SUDO tincd -n $TINC_VNET_NAME -K
-$SUDO chmod 644 $NET_ROOT/hosts/*
 
+# Rectify permissions
+$SUDO chown root -R $NET_ROOT
+$SUDO chown $USER -R $NET_ROOT/hosts
+chmod 644 $NET_ROOT/hosts/*
+
+# Sync to remote host
+[ "$TINC_IS_SYNC" == 'y' ] && {
+echo -n "Update configs... "
+scp -q $NET_ROOT/hosts/$TINC_VHOST_NAME $TINC_SYNC_FROM:/etc/tinc/$TINC_VNET_NAME/hosts \
+    && echo 'done.' || exit 1
+}
+
+###############
+# Start tincd
+###############
+echo -n "Start tinc service... "
+$SUDO service tinc stop && $SUDO service tinc start \
+    && echo 'done.'
 
