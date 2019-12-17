@@ -1,13 +1,12 @@
 # Alias
 alias c=clear
-alias py=python3
-alias py3=python3
-alias py2=python2
 alias cd..='cd ..'
+alias vi=vim
 alias sl='sl -e'
 alias dul='sudo du -ha --max-depth=1'
 alias dfh='df -h'
 alias se='sudo service'
+alias rnginx='sudo nginx -t && se nginx restart'
 alias ca='cacaview'
 alias untar='tar -zxpf'
 alias reloadbashrc='source ~/.bashrc'

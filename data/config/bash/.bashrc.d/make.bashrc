@@ -1,4 +1,5 @@
 # Make Alias
+[ -n "$(command -v make)" ] && {
 
 function mmake() {
     current=$(realpath $(pwd))
@@ -15,4 +16,6 @@ function mmake() {
             return 128
         fi
     done
+}
+
 }

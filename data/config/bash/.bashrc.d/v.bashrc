@@ -1,3 +1,5 @@
+[ -n "$(command -v vim)" ] && {
+
 _completion_loader scp
 complete -o nospace -F _scp v
 v() {
@@ -20,4 +22,6 @@ v() {
             echo "Download Fail!"
         fi
     fi
+}
+
 }
