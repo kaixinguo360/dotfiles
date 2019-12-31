@@ -1,5 +1,4 @@
 #Git Alias
-[ -n "$(command -v git)" ] && {
 
 alias g='git'
 _completion_loader git
@@ -42,4 +41,3 @@ function guph() {
     gph $@
 }
 
-}
