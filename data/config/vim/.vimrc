@@ -39,7 +39,7 @@ let g:ycm_key_invoke_completion = '<c-z>'
 let g:ycm_key_list_stop_completion = ['<C-y>', '<CR>']
 set completeopt=menu,menuone
 
-nnoremap <Leader>g :YcmCompleter GoTo<CR>
+nnoremap <c-g> :YcmCompleter GoTo<CR>
 noremap <c-z> <NOP>
 
 let g:ycm_semantic_triggers = {
