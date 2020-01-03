@@ -11,6 +11,18 @@ fi
 has rosdep && [ "$1" != "-f" ] && echo 'ros installed' && exit 0
 need curl
 
+# Read Input
+read_input \
+    ROS_FULL_INSTALL bool '[1/3] Desktop-Full Install? (Recommended)' y
+[ "$ROS_FULL_INSTALL" == 'n' ] && read_input \
+    ROS_DESKTOP_INSTALL bool '[2/3] Desktop Install?' y
+[ "$ROS_DESKTOP_INSTALL" == 'n' ] && read_input \
+    ROS_BASE_INSTALL bool '[3/3] ROS-Base? (Bare Bones)' y
+[[ "$ROS_FULL_INSTALL" != 'y' && \
+   "$ROS_DESKTOP_INSTALL" != 'y' && \
+   "$ROS_BASE_INSTALL" != 'y' ]] && { echo 'Cancelled'; exit 0; }
+
+# Install Ros
 # Wiki: http://wiki.ros.org/kinetic/Installation/Ubuntu
 
 # 1.1 Configure your Ubuntu repositories (Tsinghua University Mirror)
@@ -26,7 +38,12 @@ curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE
 $sudo apt-get update -y || exit
 
 # Desktop-Full Install: (Recommended) : ROS, rqt, rviz, robot-generic libraries, 2D/3D simulators, navigation and 2D/3D perception
-$sudo apt-get install -y ros-kinetic-desktop-full || exit
+[ "$ROS_FULL_INSTALL" == 'y' ] && \
+    { $sudo apt-get install -y ros-kinetic-desktop-full || exit; }
+[ "$ROS_DESKTOP_INSTALL" == 'y' ] && \
+    { $sudo apt-get install -y ros-kinetic-desktop || exit; }
+[ "$ROS_BASE_INSTALL" == 'y' ] && \
+    { $sudo apt-get install -y ros-kinetic-ros-base || exit; }
 
 # 1.5 Dependencies for building packages
 $sudo apt install -y python-rosinstall python-rosinstall-generator python-wstool build-essential || exit
