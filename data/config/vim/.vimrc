@@ -38,6 +38,7 @@ let g:ycm_goto_buffer_command = 'horizontal-split'
 let g:ycm_key_invoke_completion = '<c-z>'
 let g:ycm_key_list_stop_completion = ['<C-y>', '<CR>']
 set completeopt=menu,menuone
+set encoding=utf-8
 
 nnoremap <c-g> :YcmCompleter GoTo<CR>
 noremap <c-z> <NOP>
