@@ -38,7 +38,6 @@ let g:ycm_goto_buffer_command = 'horizontal-split'
 let g:ycm_key_invoke_completion = '<c-z>'
 let g:ycm_key_list_stop_completion = ['<C-y>', '<CR>']
 set completeopt=menu,menuone
-set encoding=utf-8
 
 nnoremap <c-g> :YcmCompleter GoTo<CR>
 noremap <c-z> <NOP>
@@ -108,7 +107,7 @@ call Cabbrev('mmake', '!bash -ic mmake')
 
 
 """"""""""""""""""""""""""""""""""""""""
-"      Persistent undo
+"      Persistent Undo
 """"""""""""""""""""""""""""""""""""""""
 
 " Put plugins and dictionaries in this dir (also on Windows)
@@ -127,6 +126,20 @@ if has('persistent_undo')
     set undolevels=5000
     set undoreload=10000
 endif
+
+
+""""""""""""""""""""""""""""""""""""""""
+"      Indent
+""""""""""""""""""""""""""""""""""""""""
+autocmd FileType php,python,c,java,perl,shell,bash,vim,ruby,cpp set ai
+autocmd FileType php,python,c,java,perl,shell,bash,vim,ruby,cpp set sw=4
+autocmd FileType php,python,c,java,perl,shell,bash,vim,ruby,cpp set ts=4
+autocmd FileType php,python,c,java,perl,shell,bash,vim,ruby,cpp set sts=4
+autocmd FileType javascript,html,css,xml set ai
+autocmd FileType javascript,html,css,xml set sw=2
+autocmd FileType javascript,html,css,xml set ts=2
+autocmd FileType javascript,html,css,xml set sts=2
+
 
 """"""""""""""""""""""""""""""""""""""""
 "      MySettings
