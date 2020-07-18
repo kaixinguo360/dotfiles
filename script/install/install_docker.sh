@@ -19,6 +19,8 @@ cd \
 rm -f get-docker.sh
 
 # Executing the Docker Command Without Sudo
+echo -e "\nMaybe you should use this command to add specified user to docker group"
+echo -e "\n  $SUDO usermod -aG docker $USER\n"
 [ -n "$USER" ] && $SUDO usermod -aG docker $USER
 exit 0
 
