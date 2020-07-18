@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Show Help Info
+if [[ $1 = "" || $1 = "-h" || $1 = "--help" ]];then
+    echo -e "Usage: ${0##*/} [-i] [TOOL]..."
+    echo -e "Remove tools"
+    exit 0
+fi
+
+cd $(dirname $(realpath $0))/../../script
+[ "$1" = "-i" ] && { INTERACTIVE='-i'; shift; } || { INTERACTIVE=''; }
+./remove.sh $INTERACTIVE "$@"

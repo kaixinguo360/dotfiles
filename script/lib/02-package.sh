@@ -1,3 +1,7 @@
+################
+# Install-tool #
+################
+
 # Install Packages
 function install_pkg() {
     [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
@@ -59,6 +63,74 @@ function install_tool() {
     [ -z "$INTERACTIVE" ] && export IN_SCRIPT=$BACKUP
     return $RET
 }
+
+###############
+# Remove-tool #
+###############
+
+# Remove Packages
+function remove_pkg() {
+    [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
+    [ -z "$1" ] && return 0
+    [ -z "$FORCE" ] && {
+        not_installed $@ && { echo "Packages '$@' not installed"; return 0; }
+    }
+    echo Remove Packages: $@
+    [ "$PMG" = "apt" -o "$PMG" = "termux" ] && {
+        DEBIAN_FRONTEND=noninteractive $SUDO apt purge \
+            -o Dpkg::Options::="--force-confdef" \
+            -o Dpkg::Options::="--force-confold" \
+            --auto-remove \
+            -yq $@
+        return
+    }
+    [ "$PMG" = "apk" ] && {
+        $SUDO apk del --no-cache $@
+        return
+    }
+}
+
+function remove_list() {
+    [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
+    [ -z "$1" ] && return 0
+    has_list $1 || { echo "No such list '$1'"; return 1; }
+    PKGS=$(list_pkgs $1)
+    [ -z "$FORCE" ] && {
+        not_installed $PKGS && { echo "List '$1' not installed"; return 0; }
+    }
+    (cd;list_pre $1|$SUDO sh)||return 1
+    remove_pkg $FORCE $PKGS||return 1
+    (cd;list_post $1|$SUDO sh)||return 1
+}
+
+function remove_script() {
+    CMD_PATH="$ROOT_PATH/remove/remove_$1"; shift
+    [ -f "$CMD_PATH" ] || { echo "No such script '$1'"; return 1; }
+    $CMD_PATH $@
+}
+
+# Remove Tools
+function remove_tool() {
+    local INTERACTIVE BACKUP
+    BACKUP=$IN_SCRIPT
+    [ "$1" = "-i" ] && { INTERACTIVE='y'; shift; } || { INTERACTIVE=''; }
+    TOOL="$1"; shift
+    [ -z "$TOOL" ] && return 0
+    [ -z "$INTERACTIVE" ] && export IN_SCRIPT='y'
+        if [ "${TOOL##*.}" = "$TOOL" ];then
+            remove_pkg $@ $TOOL; RET=$?;
+        elif [ "${TOOL##*.}" = "list" ];then
+            remove_list $@ $TOOL; RET=$?;
+        elif [ "${TOOL##*.}" = "sh" ];then
+            remove_script $TOOL $@; RET=$?;
+        fi
+    [ -z "$INTERACTIVE" ] && export IN_SCRIPT=$BACKUP
+    return $RET
+}
+
+#########
+# Other #
+#########
 
 # Ensure specified tools has been installed
 function need() {

@@ -24,7 +24,7 @@ function has() {
 }
 function not_has() { if has $@; then return 1; else return 0; fi; }
 
-# Is Package Installed
+# Is All Input Package Installed
 function is_installed() {
     for CMD in $@
     do
@@ -33,7 +33,16 @@ function is_installed() {
     done
     return 0
 }
-function not_installed() { if is_installed $@; then return 1; else return 0; fi; }
+
+# Is All Input Package Not Installed
+function not_installed() {
+    for CMD in $@
+    do
+        [ "$PMG" = "apt" -o "$PMG" = "termux" ] && [ -n "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
+        [ "$PMG" = "apk" ] && [ -n "$(apk info 2>/dev/null|sed -n '/^'$CMD'$/p')" ] && return 1
+    done
+    return 0
+}
 
 # Only support specified package manager
 function only_support() {
