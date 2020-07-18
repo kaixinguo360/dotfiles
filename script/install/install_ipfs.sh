@@ -80,7 +80,7 @@ DAEMON=ipfs
 DAEMON_ARGS="deamon"
 USER=$USER
 HERE
-cat $(dirname $0)/../../data/static/init-common >> $INIT_D
+cat $(dirname $0)/../../data/snippets/init-common >> $INIT_D
 
 $SUDO chmod 644 $SYSTEM_D
 $SUDO chmod 755 $INIT_D
