@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 
 # Show Help Info
-if [[ $1 = "" || $1 = "-h" || $1 = "--help" ]];then
+if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];then
     echo -e "Usage: ${0##*/} [-i] [TOOL] [OPTION]..."
     echo -e "Install tool"
     exit 0

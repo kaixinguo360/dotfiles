@@ -2,11 +2,12 @@ coreutils
 vim
 git
 bash-completion
-man
 wget
 curl
 file
 tree
 jq
+@!apk:man
+@apk:mandoc
 @!apk:dnsutils
 @apk:bind-tools

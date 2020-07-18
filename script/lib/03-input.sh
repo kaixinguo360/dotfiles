@@ -1,5 +1,5 @@
 # Read Input
-function read_input() {
+read_input() {
     [ -z "$read_input_run" ] && {
         echo "script: ${0##*/}"
         echo "----------------"
@@ -32,7 +32,7 @@ function read_input() {
 
 
 # Read Anything
-function read_bool() {
+read_bool() {
     echo -e "\033[32m$2\033[0m"
     [ -n "$3" -a "$3" != "-" ] && INFO="[Y/n] (default: $3):" || INFO="[Y/n]"
     while true :
@@ -65,7 +65,7 @@ function read_bool() {
     eval "$1=$INPUT"
 }
 
-function read_str() {
+read_str() {
     echo -e "\033[32m$2\033[0m"
     [ -n "$3" -a "$3" != "-" ] && INFO="Input (default: $3):" || INFO="Input:"
     while true :
@@ -89,7 +89,7 @@ function read_str() {
     eval "$1=\"$INPUT\""
 }
 
-function read_pass() {
+read_pass() {
     echo -e "\033[32m$2\033[0m"
     [ -n "$3" -a "$3" != "-" ] && INFO="Input (default: $3):" || INFO="Input:"
     while true :

@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 . $(dirname $(realpath $0))/lib.sh
 
 # Show Help Info
-if [[ $1 = "-h" || $1 = "--help" ]];then
+if [ "$1" = "-h" -o "$1" = "--help" ];then
     echo -e "Change China Source"
     exit 0
 fi

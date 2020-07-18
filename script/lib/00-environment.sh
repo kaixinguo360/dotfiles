@@ -1,8 +1,8 @@
 # Get Environment Variable
-[[ -n "$PREFIX" ]] && IS_TERMUX='y'
-[[ -n "$IS_TERMUX" && ! -f "$PREFIX/etc/apt/sources.list.d/pointless.list" ]] && NEED_POINTLESS='y'
-[[ -z "$IS_TERMUX" && $UID -ne 0 ]] && { SUDO='sudo'; sudo='sudo'; }
-[[ -z "$IS_TERMUX" && -n "$(cat /proc/1/cgroup|grep docker)" ]] && IS_DOCKER='y'
+[ -n "$PREFIX" ] && IS_TERMUX='y'
+[ -n "$IS_TERMUX" ] && [ ! -f "$PREFIX/etc/apt/sources.list.d/pointless.list" ] && NEED_POINTLESS='y'
+[ -z "$IS_TERMUX" ] && [ ! "`id -u`" = "0" ] && { SUDO='sudo'; sudo='sudo'; }
+[ -z "$IS_TERMUX" ] && [ -n "$(cat /proc/1/cgroup|grep docker)" ] && IS_DOCKER='y'
 
 # Get Package Manager
 PMG="unkown"
@@ -15,17 +15,17 @@ PMG="unkown"
 [ -z "$DEFAULT_HOST_NAME" ] && DEFAULT_HOST_NAME=$HOSTNAME
 
 # Has Command
-function has() {
+has() {
     for CMD in $@
     do
         [ -z "$(command -v $CMD)" ] && return 1
     done
     return 0
 }
-function not_has() { if has $@; then return 1; else return 0; fi; }
+not_has() { if has $@; then return 1; else return 0; fi; }
 
 # Is All Input Package Installed
-function is_installed() {
+is_installed() {
     for CMD in $@
     do
         [ "$PMG" = "apt" -o "$PMG" = "termux" ] && [ -z "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
@@ -35,7 +35,7 @@ function is_installed() {
 }
 
 # Is All Input Package Not Installed
-function not_installed() {
+not_installed() {
     for CMD in $@
     do
         [ "$PMG" = "apt" -o "$PMG" = "termux" ] && [ -n "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
@@ -45,7 +45,7 @@ function not_installed() {
 }
 
 # Only support specified package manager
-function only_support() {
+only_support() {
     [ "$1" = "-f" ] && return 0
     for CMD in $@
     do
@@ -56,7 +56,7 @@ function only_support() {
 }
 
 # Not support docker
-function not_support_docker() {
+not_support_docker() {
     [ -n "$IS_DOCKER" ] && [ "$1" != "-f" ] && { echo "Unsupported environment 'docker'" >&2; exit 1; }
 }
 

@@ -3,7 +3,7 @@
 ################
 
 # Install Packages
-function install_pkg() {
+install_pkg() {
     [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
     [ -z "$1" ] && return 0
     [ -z "$FORCE" ] && {
@@ -26,7 +26,7 @@ function install_pkg() {
     }
 }
 
-function install_list() {
+install_list() {
     [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
     [ -z "$1" ] && return 0
     has_list $1 || { echo "No such list '$1'"; return 1; }
@@ -39,14 +39,14 @@ function install_list() {
     (cd;list_post $1|$SUDO sh)||return 1
 }
 
-function install_script() {
+install_script() {
     CMD_PATH="$ROOT_PATH/install/install_$1"; shift
     [ -f "$CMD_PATH" ] || { echo "No such script '$1'"; return 1; }
     $CMD_PATH $@
 }
 
 # Install Tools
-function install_tool() {
+install_tool() {
     local INTERACTIVE BACKUP
     BACKUP=$IN_SCRIPT
     [ "$1" = "-i" ] && { INTERACTIVE='y'; shift; } || { INTERACTIVE=''; }
@@ -69,7 +69,7 @@ function install_tool() {
 ###############
 
 # Remove Packages
-function remove_pkg() {
+remove_pkg() {
     [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
     [ -z "$1" ] && return 0
     [ -z "$FORCE" ] && {
@@ -90,7 +90,7 @@ function remove_pkg() {
     }
 }
 
-function remove_list() {
+remove_list() {
     [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
     [ -z "$1" ] && return 0
     has_list $1 || { echo "No such list '$1'"; return 1; }
@@ -103,14 +103,14 @@ function remove_list() {
     (cd;list_post $1|$SUDO sh)||return 1
 }
 
-function remove_script() {
+remove_script() {
     CMD_PATH="$ROOT_PATH/remove/remove_$1"; shift
     [ -f "$CMD_PATH" ] || { echo "No such script '$1'"; return 1; }
     $CMD_PATH $@
 }
 
 # Remove Tools
-function remove_tool() {
+remove_tool() {
     local INTERACTIVE BACKUP
     BACKUP=$IN_SCRIPT
     [ "$1" = "-i" ] && { INTERACTIVE='y'; shift; } || { INTERACTIVE=''; }
@@ -133,7 +133,7 @@ function remove_tool() {
 #########
 
 # Ensure specified tools has been installed
-function need() {
+need() {
     for TOOL in "$@"
     do
         install_tool $TOOL || { echo "Dependent tool '$TOOL' installation failed"; exit 1; }
@@ -141,7 +141,7 @@ function need() {
 }
 
 # Start Service
-function start_service() {
+start_service() {
     only_support apt
     echo "Starting $1"
     $SUDO service $1 stop >/dev/null 2>&1
@@ -149,7 +149,7 @@ function start_service() {
 }
 
 # Install Pointless source
-function install_pointless() {
+install_pointless() {
     [[ -n "$NEED_POINTLESS" ]] && {
         unset NEED_POINTLESS
         need wget bash 'apt -f'

@@ -1,5 +1,5 @@
 # Install Config
-function install_config() {
+install_config() {
     files=$(ls -A $1)
     for file in ${files[@]}
     do
@@ -10,7 +10,7 @@ function install_config() {
 }
 
 # Remove Config
-function remove_config() {
+remove_config() {
     files=$(ls -A $1)
     for file in ${files[@]}
     do
