@@ -8,5 +8,8 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ];then
     exit 0
 fi
 
-install_tool $@ || { echo "An error occured, stop installing of '$@'"; }
+install_tool $@ || {
+    echo "An error occured while installing '$@'."
+    exit 1
+}
 

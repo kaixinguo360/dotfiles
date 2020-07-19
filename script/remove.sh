@@ -20,5 +20,8 @@ fi
 # Install tools
 for TOOL in $TOOLS
 do
-    remove/remove_tool.sh $INTERACTIVE $TOOL
+    remove/remove_tool.sh $INTERACTIVE $TOOL || {
+        echo 'Batch remove stopped.'
+        exit 1
+    }
 done

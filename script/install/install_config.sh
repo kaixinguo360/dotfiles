@@ -10,20 +10,31 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
     exit 0
 fi
 
+# Install Config
+install_config() {
+    files=$(ls -A $1)
+    for file in ${files[@]}
+    do
+        rm -f $HOME/$file
+        ln -s $(realpath $dir/$file) $HOME
+    done
+    #stow $1 -t $HOME
+}
+
 # Install
 for dir in ${configs[@]};
 do
-    echo "Installing config files of '$dir'"
+    echo -n "Installing config of '$dir'... "
     CUSTOM="$dir/install.sh"
     if [ -f "$CUSTOM" ];then
-        echo "Running custom script $CUSTOM"
         [ ! -x "$CUSTOM" ] && { echo "Permission denied, can't execute $CUSTOM"; exit 1; }
         $CUSTOM
     else
-        echo "No custom script found, use default script."
         install_config $dir
     fi
-    [ "$?" != "0" ] && { echo "an error occured while installing config files of '$dir', installation stopped."; exit 1; }
-    echo "Config files of '$dir' is ready"
+    [ "$?" != "0" ] && { echo "An error occured while installing config files of '$dir', installation stopped."; exit 1; }
+    echo 'done.'
 done
+
+exit 0
 

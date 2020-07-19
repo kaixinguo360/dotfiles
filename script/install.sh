@@ -21,5 +21,8 @@ has bash || { install_pkg bash; }
 # Install tools
 for TOOL in $TOOLS
 do
-    install/install_tool.sh $INTERACTIVE $TOOL
+    install/install_tool.sh $INTERACTIVE $TOOL || {
+        echo 'Batch install stopped.'
+        exit 1
+    }
 done

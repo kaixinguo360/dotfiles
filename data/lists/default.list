@@ -2,6 +2,7 @@ coreutils
 vim
 git
 bash-completion
+ca-certificates
 wget
 curl
 file

@@ -10,21 +10,30 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
     exit 0
 fi
 
+# Remove Config
+remove_config() {
+    files=$(ls -A $1)
+    for file in ${files[@]}
+    do
+        rm -f $HOME/$file
+    done
+    #stow -D $1 -t $HOME
+}
 
 # Remove
 for dir in ${configs[@]};
 do
-    echo "Removing config files of '$dir'"
+    echo -n "Removing config files of '$dir'... "
     CUSTOM="$dir/remove.sh"
     if [ -f "$CUSTOM" ];then
-        echo "Running custom script $CUSTOM"
         [ ! -x "$CUSTOM" ] && { echo "Permission denied, can't execute $CUSTOM"; exit 1; }
         $CUSTOM
     else
-        echo "No custom script found, use default script."
         remove_config $dir
     fi
-    [ "$?" != "0" ] && { echo "An error occured while removing config files of '$dir', Remove stopped."; exit 1; }
-    echo "Config files of '$dir' is removed"
+    [ "$?" != "0" ] && { echo "An error occured while removing config files of '$dir', remove stopped."; exit 1; }
+    echo 'done.'
 done
+
+exit 0
 

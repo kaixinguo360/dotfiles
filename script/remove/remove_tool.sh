@@ -8,5 +8,8 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
     exit 0
 fi
 
-remove_tool $@ || { echo "An error occured, stop remove '$@'"; }
+remove_tool $@ || {
+    echo "An error occured while removing '$@'."
+    exit 1
+}
 

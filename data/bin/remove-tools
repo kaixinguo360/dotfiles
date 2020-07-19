@@ -1,5 +1,10 @@
 #!/bin/bash
 
+cd $(dirname $(realpath $0))/../../script
+
+# Load libs
+for LIB in ./lib/??-*.sh; do . "$LIB"; done
+
 # Show Help Info
 if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];then
     echo -e "Usage: ${0##*/} [-i] [TOOL]..."
@@ -7,6 +12,14 @@ if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];then
     exit 0
 fi
 
-cd $(dirname $(realpath $0))/../../script
+# Read command line arguments
 [ "$1" = "-i" ] && { INTERACTIVE='-i'; shift; } || { INTERACTIVE=''; }
-./remove.sh $INTERACTIVE "$@"
+
+# Install tools
+for TOOL in $@
+do
+    remove/remove_tool.sh $INTERACTIVE $TOOL || {
+        echo 'Batch remove stopped.'
+        exit 1
+    }
+done

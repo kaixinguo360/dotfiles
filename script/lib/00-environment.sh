@@ -7,7 +7,7 @@
 # Get Package Manager
 PMG="unkown"
 [ -n "$(command -v apk)" ] && PMG="apk"
-[ -n "$(command -v apt)" ] && PMG="apt"
+[ -n "$(command -v apt-get)" ] && PMG="apt"
 [ -n "$IS_TERMUX" ] && PMG="termux"
 
 # Default Arguments
