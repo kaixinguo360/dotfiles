@@ -1,13 +1,10 @@
 #!/bin/sh
 cd $(dirname $(realpath $0))
 
-# Load libs
-for LIB in ./lib/??-*.sh; do . "$LIB"; done
-
 # Show help info
 if [ "$1" = "-h" -o "$1" = "--help" ];then
-    echo -e "$0 [-i] [TOOL]..."
-    echo -e "Remove tools"
+    echo "$0 [-i] TOOL..."
+    echo "Remove tools"
     exit 0
 fi
 
@@ -15,12 +12,15 @@ fi
 [ "$1" = "-i" ] && { INTERACTIVE='-i'; shift; } || { INTERACTIVE=''; }
 [ -z "$*" ] && TOOLS="config.sh" || TOOLS="$@"
 
+# Load libs
+ROOT_PATH=.; for LIB in $ROOT_PATH/lib/??-*.sh; do . "$LIB"; done
+
 #has bash || { install_pkg bash; }
 
 # Install tools
 for TOOL in $TOOLS
 do
-    remove/remove_tool.sh $INTERACTIVE $TOOL || {
+    bin/tool-remove $INTERACTIVE $TOOL || {
         echo 'Batch remove stopped.'
         exit 1
     }

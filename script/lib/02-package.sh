@@ -128,8 +128,9 @@ remove_list() {
 }
 
 remove_script() {
-    CMD_PATH="$ROOT_PATH/remove/remove_$1"; shift
+    CMD_PATH="$ROOT_PATH/remove/remove_$1"
     [ -f "$CMD_PATH" ] || { echo "No such script '$1'"; return 1; }
+    shift
     $CMD_PATH $@
 }
 

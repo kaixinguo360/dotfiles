@@ -1,24 +1,21 @@
-#!/bin/bash
+#!/bin/sh
 
-cd $(dirname $(realpath $0))/../../script
-
-# Load libs
-for LIB in ./lib/??-*.sh; do . "$LIB"; done
+cd $(dirname $(realpath $0))/..
 
 # Show Help Info
 if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];then
-    echo -e "Usage: ${0##*/} [-i] [TOOL]..."
-    echo -e "Remove tools"
+    echo "Usage: ${0##*/} [-i] TOOL..."
+    echo "Remove tools"
     exit 0
 fi
 
 # Read command line arguments
 [ "$1" = "-i" ] && { INTERACTIVE='-i'; shift; } || { INTERACTIVE=''; }
 
-# Install tools
+# Remove tools
 for TOOL in $@
 do
-    remove/remove_tool.sh $INTERACTIVE $TOOL || {
+    bin/tool-remove $INTERACTIVE $TOOL || {
         echo 'Batch remove stopped.'
         exit 1
     }

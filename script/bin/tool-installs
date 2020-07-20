@@ -1,14 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
-cd $(dirname $(realpath $0))/../../script
-
-# Load libs
-for LIB in ./lib/??-*.sh; do . "$LIB"; done
+cd $(dirname $(realpath $0))/..
 
 # Show Help Info
 if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];then
-    echo -e "Usage: ${0##*/} [-i] [TOOL]..."
-    echo -e "Install tools"
+    echo "Usage: ${0##*/} [-i] TOOL..."
+    echo "Install tools"
     exit 0
 fi
 
@@ -18,7 +15,7 @@ fi
 # Install tools
 for TOOL in $@
 do
-    install/install_tool.sh $INTERACTIVE $TOOL || {
+    bin/tool-install $INTERACTIVE $TOOL || {
         echo 'Batch install stopped.'
         exit 1
     }

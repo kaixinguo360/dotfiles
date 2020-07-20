@@ -18,9 +18,8 @@ function _installable_tools() {
     fi
 }
 
-complete -F _installable_tools install-tool
-complete -F _installable_tools install-tools
-
+complete -F _installable_tools tool-install
+complete -F _installable_tools tool-installs
 
 # Remove-tool #
 
@@ -41,5 +40,9 @@ function _removable_tools() {
     fi
 }
 
-complete -F _removable_tools remove-tool
-complete -F _removable_tools remove-tools
+complete -F _removable_tools tool-remove
+complete -F _removable_tools tool-removes
+
+# Includ #
+
+PATH="$(realpath $HOME/.bashrc.d)/../../../../script/bin:$PATH"
