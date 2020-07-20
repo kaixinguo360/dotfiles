@@ -6,4 +6,6 @@ COPY / /root/.dotfiles
 
 RUN .dotfiles/script/install.sh
 
-ENTRYPOINT bash
+ENTRYPOINT [ "bash", "-ic" ]
+
+CMD [ "bash" ]
