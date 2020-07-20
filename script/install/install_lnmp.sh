@@ -14,9 +14,9 @@ has nginx mysql php && [ "$1" != "-f" ] && echo 'lnmp installed' && exit 0
 
 # Read Input
 read_input \
-    LNMP_HOST_NAME str 'Domain name of this host' $DEFAULT_HOST_NAME \
-    LNMP_MYSQL_PASSWORD pass 'Root password of mysql' $DEFAULT_PASSWORD \
-    LNMP_RUN_MYSQL_SECURE bool 'Run mysql_secure_installation?' n
+    LNMP_HOST_NAME str '[1/3] Domain name of this host' $DEFAULT_HOST_NAME \
+    LNMP_MYSQL_PASSWORD pass '[2/3] Root password of mysql' $DEFAULT_PASSWORD \
+    LNMP_RUN_MYSQL_SECURE bool '[3/3] Run mysql_secure_installation?' n
 
 # Static Params
 PHP_CONF='/etc/php/7.0/fpm/php.ini'

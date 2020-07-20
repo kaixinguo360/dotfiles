@@ -13,9 +13,9 @@ need curl
 
 # Read Input
 read_input \
-    ROS_FULL_INSTALL bool '[1/3] Desktop-Full Install? (Recommended)' y
+    ROS_FULL_INSTALL bool '[1/1] Desktop-Full Install? (Recommended)' y
 [ "$ROS_FULL_INSTALL" == 'n' ] && read_input \
-    ROS_DESKTOP_INSTALL bool '[2/3] Desktop Install?' y
+    ROS_DESKTOP_INSTALL bool '[2/2] Desktop Install?' y
 [ "$ROS_DESKTOP_INSTALL" == 'n' ] && read_input \
     ROS_BASE_INSTALL bool '[3/3] ROS-Base? (Bare Bones)' y
 [[ "$ROS_FULL_INSTALL" != 'y' && \
