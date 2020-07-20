@@ -13,5 +13,3 @@ done
 
 # Create .bin/local
 mkdir -p $HOME/.bin/local
-rm -f .bashrc.d/local
-ln -sf $(realpath $HOME/.bin/local) .bashrc.d/local

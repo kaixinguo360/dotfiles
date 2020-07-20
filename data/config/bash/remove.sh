@@ -8,6 +8,3 @@ for file in ${files[@]}
 do
     rm -f $HOME/$file
 done
-
-# Remove .bin/local
-rm -f .bashrc.d/local

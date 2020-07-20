@@ -124,8 +124,8 @@ do
 done
 
 # include ~/.bashrc.d/local/*.bashrc
-[ -n "$(ls ~/.bashrc.d/local/*.bashrc 2>/dev/null)" ] && {
-for file in ~/.bashrc.d/local/*.bashrc;
+[ -n "$(ls ~/.bin/local/*.bashrc 2>/dev/null)" ] && {
+for file in ~/.bin/local/*.bashrc;
 do
     source "$file"
 done
