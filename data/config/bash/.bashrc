@@ -117,18 +117,39 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# Builtin bin
+# include $ROOT/data/bin to PATH
+PATH="$(realpath $HOME/.bashrc.d)/../../../bin:$PATH"
+
+# Builtin bashrc
 # include ~/.bashrc.d/*.bashrc
 for file in ~/.bashrc.d/*.bashrc;
 do
     source "$file"
 done
 
-# include ~/.bashrc.d/local/*.bashrc
+# Auto-generated bin
+# include ~/.local/bin to PATH
+PATH="$HOME/.local/bin:$PATH"
+
+# Auto-generated bashrc
+# include ~/.local/bashrc.d/*.bashrc
+[ -n "$(ls ~/.local/bashrc.d/*.bashrc 2>/dev/null)" ] && {
+for file in ~/.local/bashrc.d/*.bashrc;
+do
+    source "$file"
+done
+}
+
+# User bin
+# include ~/.bin to PATH
+PATH="$HOME/.bin:$PATH"
+
+# User bashrc
+# include ~/.bin/local/*.bashrc
 [ -n "$(ls ~/.bin/local/*.bashrc 2>/dev/null)" ] && {
 for file in ~/.bin/local/*.bashrc;
 do
     source "$file"
 done
 }
-
-PATH="$HOME/.bin:$(realpath $HOME/.bashrc.d)/../../../bin:$PATH"
