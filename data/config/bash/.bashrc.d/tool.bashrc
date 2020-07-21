@@ -1,5 +1,18 @@
+# Includ bin #
 
-# Install-tool #
+PATH="$(realpath $HOME/.bashrc.d)/../../../../script/bin:$PATH"
+
+# Bash-Completion #
+
+complete -F _installable_tools tool-install
+complete -F _installable_tools tool-installs
+
+complete -F _removable_tools tool-remove
+complete -F _removable_tools tool-removes
+
+complete -F _installable_tools tool-test
+
+# Bash-Completion Function #
 
 function _installable_tools() {
     local cur prev opts lists scripts
@@ -18,11 +31,6 @@ function _installable_tools() {
     fi
 }
 
-complete -F _installable_tools tool-install
-complete -F _installable_tools tool-installs
-
-# Remove-tool #
-
 function _removable_tools() {
     local cur prev opts lists scripts
     COMPREPLY=()
@@ -40,9 +48,3 @@ function _removable_tools() {
     fi
 }
 
-complete -F _removable_tools tool-remove
-complete -F _removable_tools tool-removes
-
-# Includ #
-
-PATH="$(realpath $HOME/.bashrc.d)/../../../../script/bin:$PATH"

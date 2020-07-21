@@ -1,0 +1,36 @@
+#!/bin/bash
+
+[ -z "$@" ] && {
+    echo "Usage: ${0##*/} TOOL..."
+    echo "Test tools"
+    echo "Use \`\$TOOL_TEST_CMD TOOL\` to test every TOOL"
+    exit 0
+}
+
+[ -z "$TOOL_TEST_CMD" ] && {
+    echo "Please set environment variable '\$TOOL_TEST_CMD'!";
+    exit 1;
+}
+
+LOG_DIR="/tmp/tool-test-log"
+
+mkdir -p "$LOG_DIR"
+rm -f $LOG_DIR/*.log
+
+for TOOL in $@
+do
+    echo -n "Testing '$TOOL'... " \
+        && $TOOL_TEST_CMD $TOOL \
+            > "$LOG_DIR/$TOOL.log" \
+        && rm "$LOG_DIR/$TOOL.log" \
+        && echo passed. \
+        || echo failed.
+done
+
+[ -n "`ls $LOG_DIR`" ] && {
+    echo -e "\nSome tests failed, logs saved in:"
+    ls -1 $LOG_DIR | sed "s:^: - $LOG_DIR/:"
+} || {
+    echo -e "\nAll Test Passed."
+}
+
