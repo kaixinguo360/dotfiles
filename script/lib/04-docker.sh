@@ -75,12 +75,12 @@ HERE`
 
 }
 
-# Usage: delete_local_docker_image FROM_IMAGE
-delete_local_docker_image() {
+# Usage: remove_local_docker_image FROM_IMAGE
+remove_local_docker_image() {
 
     # Set arguments
     local FROM_IMAGE="$1"
-    local BASHRCD_DIR="$HOME/.bin/local"
+    local BASHRCD_DIR="$HOME/.local/bashrc.d"
     local BASHRCD_FILE="99-dc-${FROM_IMAGE%%:*}.auto-generated.bashrc"
 
     # Remove docker image

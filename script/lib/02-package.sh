@@ -174,6 +174,22 @@ start_service() {
         && echo 'done.'
 }
 
+# Stop Service
+stop_service() {
+    only_support apt
+    echo -n "Stopping $1 service... " \
+        && $SUDO service $1 stop >/dev/null \
+        && echo 'done.'
+}
+
+# Retart Service
+restart_service() {
+    only_support apt
+    echo -n "Restarting $1 service... " \
+        && $SUDO service $1 restart >/dev/null \
+        && echo 'done.'
+}
+
 # Install Pointless source
 install_pointless() {
     [[ -n "$NEED_POINTLESS" ]] && {

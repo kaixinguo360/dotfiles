@@ -3,9 +3,7 @@
 
 # Show Help Info
 if [[ $1 = "-h" || $1 = "--help" ]];then
-    echo "Usage 1: install_dockerimage.sh FROM_IMAGE"
-    echo "Usage 2: install_dockerimage.sh (interactive install)"
-    echo -e "Build local docker images"
+    echo "Remove local docker images"
     exit 0
 fi
 
@@ -13,13 +11,17 @@ fi
 not_support_docker $1
 has docker || install_tool docker.sh
 
-# Read command line arguments
-if [ -z "$@" ]; then
-    # Read Input
-    read_input \
-        DOCKER_IMAGE_FROM str '[1/1] FROM IAMGE' 'ubuntu:16.04'
-else
-    DOCKER_IMAGE_FROM=$1
-fi
+# Default images
+[ -z "$*" ] && set \
+    ubuntu:16.04 ub \
+    alpine:3 ap \
 
-delete_local_docker_image $DOCKER_IMAGE_FROM
+# Build images
+while [ -n "$*" ]
+do
+    remove_local_docker_image $1 $2 || exit
+    #echo "Entrypoint '$ENTRYPOINT_ALIAS' has added to your bashrc"
+    shift 2
+done
+
+echo "Use 'reloadbashrc' to reload bash config."
