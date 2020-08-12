@@ -1,0 +1,16 @@
+[Unit]
+Description=MyExample
+After=syslog.target
+After=network.target
+After=mariadb.service mysqld.service postgresql.service memcached.service redis.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/myexample/bin
+ExecStart=/opt/myexample/bin/run.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
