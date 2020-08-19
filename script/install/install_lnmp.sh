@@ -21,7 +21,7 @@ read_input \
 # Static Params
 PHP_CONF='/etc/php/7.0/fpm/php.ini'
 NGINX_CONF='/etc/nginx/sites-enabled/default'
-DEFAULT_NGINX_CONF="$ROOT_PATH/../data/snippets/nginx_site_config"
+DEFAULT_NGINX_CONF="$ROOT_PATH/../snippets/nginx_site_config"
 
 # Install
 $SUDO debconf-set-selections <<< "mysql-server mysql-server/root_password password $LNMP_MYSQL_PASSWORD"

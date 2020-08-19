@@ -1,6 +1,6 @@
 # Get Content From List
 list() {
-    LIST_PATH="$ROOT_PATH/../data/lists/$1"
+    LIST_PATH="$ROOT_PATH/../lists/$1"
     [ ! -f $LIST_PATH ] && return 1
     cat "$LIST_PATH" \
         |sed 's/^\([^#]*\s\+\|\)#.*$/\1/'|sed ':a;N;s/\\\s*\n//g;$!ba'

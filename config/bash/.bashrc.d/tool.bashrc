@@ -1,6 +1,6 @@
 # Includ bin #
 
-PATH="$(realpath $HOME/.bashrc.d)/../../../../script/bin:$PATH"
+PATH="$(realpath $HOME/.bashrc.d)/../../../script/bin:$PATH"
 
 # Bash-Completion #
 
@@ -20,8 +20,8 @@ function _installable_tools() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    DOT_ROOT="$(realpath $HOME/.bashrc.d)/../../../.."
-    lists=$(ls "$DOT_ROOT/data/lists")
+    DOT_ROOT="$(realpath $HOME/.bashrc.d)/../../.."
+    lists=$(ls "$DOT_ROOT/lists")
     scripts=$(ls "$DOT_ROOT"/script/install/install_*.sh|sed 's/^.*install_//'|sed '/tool.sh/d')
     opts="-i $lists $scripts"
 
@@ -37,8 +37,8 @@ function _removable_tools() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    DOT_ROOT="$(realpath $HOME/.bashrc.d)/../../../.."
-    lists=$(ls "$DOT_ROOT/data/lists")
+    DOT_ROOT="$(realpath $HOME/.bashrc.d)/../../.."
+    lists=$(ls "$DOT_ROOT/lists")
     scripts=$(ls "$DOT_ROOT"/script/remove/remove_*.sh|sed 's/^.*remove_//'|sed '/tool.sh/d')
     opts="-i $lists $scripts"
 

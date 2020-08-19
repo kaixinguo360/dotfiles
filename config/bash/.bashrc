@@ -118,7 +118,7 @@ if ! shopt -oq posix; then
 fi
 
 # Builtin bin
-# include $ROOT/data/bin to PATH
+# include $ROOT/bin to PATH
 PATH="$(realpath $HOME/.bashrc.d)/../../../bin:$PATH"
 
 # Builtin bashrc
