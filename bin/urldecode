@@ -1,18 +1,8 @@
 #!/bin/bash
+# Usage: urldecode input...
 
-urldecode() { : "${input//+/ }"; echo -e "${_//%/\\x}"; }
+: "${*:-$(</dev/stdin)}" # read input
+: "${_//+/ }"   # '+' -> ' '
+: "${_//%/\\x}" # '%' -> '\x'
 
-# read from CLI arguments
-if [  -n "$1" ]
-then
-    input="$*"
-    urldecode
-    exit
-fi
-
-# read from interactive input
-while read -e -p "> " input
-do
-    history -s "$input"
-    urldecode
-done
+echo -e "$_"

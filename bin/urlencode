@@ -1,33 +1,19 @@
 #!/bin/bash
+# Usage: urlencode input...
 
-urlencode() {
-    l=${#input}
-    for (( i = 0 ; i < l ; i++ )); do
-        c=${input:i:1}
-        case "$c" in
-            [a-zA-Z0-9.~_-]) printf "$c" ;;
-            ' ') printf + ;;
-            *) echo -n "$c" \
-                | xxd -plain \
-                | sed 's/\(..\)/%\1/g' \
-                | tr -d '\n'
-                ;;
-        esac
-    done
-    echo
-}
+input=${*:-$(</dev/stdin)}
 
-# read from CLI arguments
-if [  -n "$1" ]
-then
-    input="$*"
-    urlencode
-    exit
-fi
-
-# read from interactive input
-while read -e -p "> " input
-do
-    history -s "$input"
-    urlencode
+l=${#input}
+for (( i = 0 ; i < l ; i++ )); do
+    c=${input:i:1}
+    case "$c" in
+        [a-zA-Z0-9.~_-]) printf "$c" ;;
+        ' ') printf + ;;
+        *) echo -n "$c" \
+            | xxd -plain \
+            | sed 's/\(..\)/%\1/g' \
+            | tr -d '\n'
+            ;;
+    esac
 done
+echo
