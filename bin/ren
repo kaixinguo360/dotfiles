@@ -1,17 +1,35 @@
 #!/bin/bash
 
 # Default params #
-LOG1=
-LOG2=yes
+LOG1=       # Log Leve 1
+LOG2=yes    # Log Leve 2
 DRY_RUN=yes
 MODE=url
-IEXT=
+IEXT=       # Ignore Extension
+COMMAND=
+PATTERN=
 
-# Get name #
+# Mode #
 url() { urldecode "$sbase"; }
 sha() { sha1sum "$spath"|cut -d ' ' -f1; }
 md5() { md5sum "$spath"|cut -d ' ' -f1; }
-getname() { tbase=$($MODE) || exit 1; }
+
+# Get Name #
+getname() {
+    if [ -n "$COMMAND" ]; then
+        tbase=$(eval $(echo "$COMMAND" \
+            | sed 's#{}#{base}#' \
+            | sed 's#{\(.*\)}#${s\1}#' \
+        ))
+    elif [ -n "$PATTERN" ]; then
+        tbase=$(eval echo $(echo "$PATTERN" \
+            | sed 's#{}#{base}#' \
+            | sed 's#{\(.*\)}#${s\1}#' \
+        ))
+    else
+        tbase=$($MODE) || exit 1
+    fi
+}
 
 # Main #
 renameimage() {
@@ -22,23 +40,23 @@ renameimage() {
 
     # ---- begin ---- #
     spath=$(realpath -s "$1")
-    dirname=${spath%/*}
+    sdirname=${spath%/*}
     sname=${spath##*/}
 
     if [ -z "$IEXT" -a -n "$(echo $sname|grep '\.')" ]; then
-        ext=${sname##*.}
-        sbase=${sname/.*}
+        sext=${sname##*.}
+        sbase=${sname%.*}
         getname
-        tname=$tbase.$ext
-        info="$dirname/{$sbase => $tbase}.$ext"
+        tname=$tbase.$sext
+        info="$sdirname/{$sbase => $tbase}.$sext"
     else
         sbase=$sname
         getname
         tname=$tbase
-        info="$dirname/{$sbase => $tbase}"
+        info="$sdirname/{$sbase => $tbase}"
     fi
 
-    tpath=$dirname/$tname
+    tpath=$sdirname/$tname
     # ---- end ---- #
 
     # Skip
@@ -66,8 +84,8 @@ renameimage() {
 
 # Process flags #
 TEMP=`getopt \
-    -o fm:eqv \
-    -l force,mode:,ext,quiet,verbose \
+    -o fm:eqvc:n: \
+    -l force,mode:,ext,quiet,verbose,command:,pattern: \
     -n "${0##*/}" \
     -- "$@"` || exit 1
 eval set -- "$TEMP"
@@ -79,6 +97,8 @@ do
         -e|--ext) IEXT=yes; shift;;
         -q|--quiet) unset LOG1 LOG2; shift;;
         -v|--verbose) LOG1=yes; LOG2=yes; shift;;
+        -c|--command) COMMAND=$2; shift 2;;
+        -n|--pattern) PATTERN=$2; shift 2;;
         --) shift; break;;
         *) echo "Unkown argument: $1"; exit 1;;
     esac
