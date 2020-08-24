@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Default params #
+LOG1=
+LOG2=yes
 DRY_RUN=yes
 MODE=url
 IEXT=
@@ -13,8 +15,10 @@ getname() { tbase=$($MODE) || exit 1; }
 
 # Main #
 renameimage() {
-    [ -f "$1" ] \
-        || { echo -e "\033[31mNot a regular file: $1\033[0m"; return 1; }
+    [ -f "$1" ] || {
+        [ -n "$LOG1" ] && echo -e "\033[31mNot a regular file: $1\033[0m"
+        return 1
+    }
 
     # ---- begin ---- #
     spath=$(realpath -s "$1")
@@ -39,31 +43,31 @@ renameimage() {
 
     # Skip
     [ "$sbase" = "$tbase" ] && {
-        echo -e "\033[32mSkip $spath\033[0m"
+        [ -n "$LOG1" ] && echo -e "\033[32mSkip $spath\033[0m"
         return 0
     }
 
     # Dry run
     [ -n "$DRY_RUN" ] && {
-        echo -e "\033[32mRename $info\033[0m"
+        [ -n "$LOG2" ] && echo -e "\033[32mRename $info\033[0m"
         return 0
     }
 
     # Exec $cmd
     cmd="mv \"$spath\" \"$tpath\""
     mv "$spath" "$tpath" && {
-        echo -e "\033[32mRename $info\033[0m"
+        [ -n "$LOG2" ] && echo -e "\033[32mRename $info\033[0m"
         return 0
     } || {
-        echo -e "\033[31mError $info\033[0m"
+        [ -n "$LOG2" ] && echo -e "\033[31mError $info\033[0m"
         return 1
     }
 }
 
 # Process flags #
 TEMP=`getopt \
-    -o fm:e \
-    -l force,mode:,ext \
+    -o fm:eqv \
+    -l force,mode:,ext,quiet,verbose \
     -n "${0##*/}" \
     -- "$@"` || exit 1
 eval set -- "$TEMP"
@@ -73,14 +77,16 @@ do
         -f|--force) unset DRY_RUN; shift;;
         -m|--mode) MODE=$2; shift 2;;
         -e|--ext) IEXT=yes; shift;;
+        -q|--quiet) unset LOG1 LOG2; shift;;
+        -v|--verbose) LOG1=yes; LOG2=yes; shift;;
         --) shift; break;;
         *) echo "Unkown argument: $1"; exit 1;;
     esac
 done
 
-[ -n "$DRY_RUN" ] && echo -e "\033[33mStarting a dry run without changes...\033[0m"
+[ -n "$DRY_RUN" ] && [ -n "$LOG2" ] && echo -e "\033[33mStarting a dry run without changes...\033[0m"
 
-echo "MODE: $MODE"
+[ -n "$LOG1" ] && echo "MODE: $MODE"
 
 if [ -n "$*" ]; then
     #read arguments
@@ -97,4 +103,4 @@ else
     done
 fi
 
-[ -n "$DRY_RUN" ] && echo -e "\033[33mNo changes to your files done, use -f to finally rename the files.\033[0m"
+[ -n "$DRY_RUN" ] && [ -n "$LOG2" ] && echo -e "\033[33mNo changes to your files done, use -f to finally rename the files.\033[0m"
