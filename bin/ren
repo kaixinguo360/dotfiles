@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# Default params #
+DRY_RUN=yes
+MODE=url
+IEXT=
+
+# Get name #
+url() { urldecode "$sbase"; }
+sha() { sha1sum "$spath"|cut -d ' ' -f1; }
+md5() { md5sum "$spath"|cut -d ' ' -f1; }
+getname() { tbase=$($MODE) || exit 1; }
+
+# Main #
+renameimage() {
+    [ -f "$1" ] \
+        || { echo -e "\033[31mNot a regular file: $1\033[0m"; return 1; }
+
+    # ---- begin ---- #
+    spath=$(realpath -s "$1")
+    dirname=${spath%/*}
+    sname=${spath##*/}
+
+    if [ -z "$IEXT" -a -n "$(echo $sname|grep '\.')" ]; then
+        ext=${sname##*.}
+        sbase=${sname/.*}
+        getname
+        tname=$tbase.$ext
+        info="$dirname/{$sbase => $tbase}.$ext"
+    else
+        sbase=$sname
+        getname
+        tname=$tbase
+        info="$dirname/{$sbase => $tbase}"
+    fi
+
+    tpath=$dirname/$tname
+    # ---- end ---- #
+
+    # Skip
+    [ "$sbase" = "$tbase" ] && {
+        echo -e "\033[32mSkip $spath\033[0m"
+        return 0
+    }
+
+    # Dry run
+    [ -n "$DRY_RUN" ] && {
+        echo -e "\033[32mRename $info\033[0m"
+        return 0
+    }
+
+    # Exec $cmd
+    cmd="mv \"$spath\" \"$tpath\""
+    mv "$spath" "$tpath" && {
+        echo -e "\033[32mRename $info\033[0m"
+        return 0
+    } || {
+        echo -e "\033[31mError $info\033[0m"
+        return 1
+    }
+}
+
+# Process flags #
+TEMP=`getopt \
+    -o fm:e \
+    -l force,mode:,ext \
+    -n "${0##*/}" \
+    -- "$@"` || exit 1
+eval set -- "$TEMP"
+while true
+do
+    case "$1" in
+        -f|--force) unset DRY_RUN; shift;;
+        -m|--mode) MODE=$2; shift 2;;
+        -e|--ext) IEXT=yes; shift;;
+        --) shift; break;;
+        *) echo "Unkown argument: $1"; exit 1;;
+    esac
+done
+
+[ -n "$DRY_RUN" ] && echo -e "\033[33mStarting a dry run without changes...\033[0m"
+
+echo "MODE: $MODE"
+
+if [ -n "$*" ]; then
+    #read arguments
+    for arg in "$@"
+    do
+        renameimage "$arg"
+    done
+else
+    #interactive
+    while read -e -p "> " input
+    do
+        history -s "$input"
+        renameimage "$input"
+    done
+fi
+
+[ -n "$DRY_RUN" ] && echo -e "\033[33mNo changes to your files done, use -f to finally rename the files.\033[0m"
