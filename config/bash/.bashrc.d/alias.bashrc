@@ -16,3 +16,4 @@ git fetch --all && \
 git reset --hard origin/master && \
 git pull) && \
 reloadbashrc'
+alias bench.sh='curl -Lso- bench.sh | bash'
