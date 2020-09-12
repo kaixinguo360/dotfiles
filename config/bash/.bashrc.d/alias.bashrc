@@ -12,8 +12,10 @@ alias untar='tar -zxpf'
 alias reloadbashrc='source ~/.bashrc'
 alias updot='upgradedotfile'
 alias upgradedotfile='(cd $HOME/.bashrc.d; \
-git fetch --all && \
-git reset --hard origin/master && \
-git pull) && \
-reloadbashrc'
+    git fetch --all && \
+    git reset --hard origin/master && \
+    git pull) && \
+    reloadbashrc'
 alias bench.sh='curl -Lso- bench.sh | bash'
+s() { bash -ic "$*"; }
+complete -F _command s
