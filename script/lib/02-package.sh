@@ -44,7 +44,7 @@ install_pkg() {
 install_list() {
     [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
     [ -z "$1" ] && return 0
-    has_list $1 || { echo "No such list '$1'"; return 1; }
+    has_list $1 || { echo "No such list '$1'" >&2; return 1; }
     PKGS=$(list_pkgs $1)
     [ -z "$FORCE" ] && {
         is_installed $PKGS && { echo "List '$1' installed"; return 0; }
@@ -56,7 +56,7 @@ install_list() {
 
 install_script() {
     CMD_PATH="$ROOT_PATH/install/install_$1"
-    [ -f "$CMD_PATH" ] || { echo "No such script '$1'"; return 1; }
+    [ -f "$CMD_PATH" ] || { echo "No such script '$1'" >&2; return 1; }
     shift
     $CMD_PATH $@
 }
@@ -117,7 +117,7 @@ remove_pkg() {
 remove_list() {
     [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
     [ -z "$1" ] && return 0
-    has_list $1 || { echo "No such list '$1'"; return 1; }
+    has_list $1 || { echo "No such list '$1'" >&2; return 1; }
     PKGS=$(list_pkgs $1)
     [ -z "$FORCE" ] && {
         not_installed $PKGS && { echo "List '$1' not installed"; return 0; }
@@ -129,7 +129,7 @@ remove_list() {
 
 remove_script() {
     CMD_PATH="$ROOT_PATH/remove/remove_$1"
-    [ -f "$CMD_PATH" ] || { echo "No such script '$1'"; return 1; }
+    [ -f "$CMD_PATH" ] || { echo "No such script '$1'" >&2; return 1; }
     shift
     $CMD_PATH $@
 }
@@ -161,7 +161,10 @@ remove_tool() {
 need() {
     for TOOL in "$@"
     do
-        install_tool $TOOL || { echo "Dependent tool '$TOOL' installation failed"; exit 1; }
+        [ "${TOOL##*.}" = "$TOOL" ] \
+            && has $TOOL \
+            && continue;
+        install_tool $TOOL || { echo "Dependent tool '$TOOL' installation failed" >&2; exit 1; }
     done
 }
 

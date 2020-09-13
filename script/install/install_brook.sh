@@ -11,15 +11,14 @@ fi
 has brook && [ "$1" != "-f" ] && echo 'brook installed' && exit 0
 need curl
 
-# Download
+# Set URL
 URL="https://github.com/txthinking/brook/releases/download/v20190601/brook_linux_"
-[ "$PMG" = "apt" ] && { REMOTE="${URL}386"; LOCAL=/usr/local/bin; }
-[ "$PMG" = "termux" ] && { REMOTE="${URL}arm64"; LOCAL=$PREFIX/bin; }
-[ "$PMG" = "apk" ] && { REMOTE="${URL}386"; LOCAL=/usr/local/bin; }
+[ "$PMG" = "apt" ] && { REMOTE="${URL}386"; LOCAL=/usr/local/bin/brook; }
+[ "$PMG" = "termux" ] && { REMOTE="${URL}arm64"; LOCAL=$PREFIX/bin/brook; }
+[ "$PMG" = "apk" ] && { REMOTE="${URL}386"; LOCAL=/usr/local/bin/brook; }
 
-$SUDO curl -f#SL $REMOTE -o $LOCAL/brook
-$SUDO chmod +x $LOCAL/brook
-
-echo "Brook has been installed to $LOCAL/brook"
-echo "See 'brook --help' to read help info."
+# Download
+download $REMOTE $LOCAL 755 \
+    && echo "Brook has been installed to $LOCAL/brook" \
+    && echo "See 'brook --help' to read help info."
 

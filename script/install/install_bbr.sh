@@ -15,7 +15,7 @@ need curl
 
 # Download && Run script.sh
 cd \
-    && curl -f#SL https://github.com/teddysun/across/raw/master/bbr.sh -o bbr.sh \
+    && download https://github.com/teddysun/across/raw/master/bbr.sh bbr.sh \
     && $SUDO bash bbr.sh
 rm -f bbr.sh
 

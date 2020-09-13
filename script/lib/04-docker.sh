@@ -5,7 +5,7 @@ build_local_docker_image() {
     local FROM_IMAGE="$1"
     local TARGET_IMAGE="my$1"
 
-    [ -z "$2" ] && echo "Please input ENTRYPOINT_ALIAS of '$TARGET_IMAGE'" && return 1
+    [ -z "$2" ] && echo "Please input ENTRYPOINT_ALIAS of '$TARGET_IMAGE'" >&2 && return 1
     local ENTRYPOINT_ALIAS="$2"
 
     ######################
