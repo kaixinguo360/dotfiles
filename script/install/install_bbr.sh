@@ -11,11 +11,9 @@ fi
 only_support $1 apt
 not_support_docker $1
 [ -n "$(lsmod|grep bbr)" ] && [ "$1" != "-f" ] && echo 'bbr installed' && exit 0
-need curl
 
-# Download && Run script.sh
-cd \
-    && download https://github.com/teddysun/across/raw/master/bbr.sh bbr.sh \
-    && $SUDO bash bbr.sh
-rm -f bbr.sh
+# Download & Run
+download_and_run \
+    https://github.com/teddysun/across/raw/master/bbr.sh \
+    bbr.sh
 

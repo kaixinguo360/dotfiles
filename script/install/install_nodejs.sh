@@ -9,13 +9,8 @@ fi
 
 # Check Dependencies
 has node && [ "$1" != "-f" ] && echo 'nodejs installed' && exit 0
-need curl
 
 # Download && Run install script
-cd \
-    && curl -f#SL https://deb.nodesource.com/setup_12.x \
-            -o get-nodejs.sh \
-    && $SUDO bash get-nodejs.sh \
+download_and_run https://deb.nodesource.com/setup_12.x get-nodejs.sh \
     && $SUDO apt-get install -y nodejs
-rm -f get-nodejs.sh
 

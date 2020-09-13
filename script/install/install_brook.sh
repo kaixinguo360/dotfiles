@@ -19,6 +19,6 @@ URL="https://github.com/txthinking/brook/releases/download/v20190601/brook_linux
 
 # Download
 download $REMOTE $LOCAL 755 \
-    && echo "Brook has been installed to $LOCAL/brook" \
+    && echo "Brook has been installed to $LOCAL" \
     && echo "See 'brook --help' to read help info."
 
