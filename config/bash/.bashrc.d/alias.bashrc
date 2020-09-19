@@ -17,5 +17,5 @@ alias upgradedotfile='(cd $HOME/.bashrc.d; \
     git pull) && \
     reloadbashrc'
 alias bench.sh='curl -Lso- bench.sh | bash'
-s() { bash -ic "$*"; }
+s() { sudo bash -ic "$*"; }
 complete -F _command s
