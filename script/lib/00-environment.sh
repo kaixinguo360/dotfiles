@@ -19,8 +19,24 @@ PMG="unkown"
 [ -z "$DEFAULT_PASSWORD" ] && DEFAULT_PASSWORD=1234567
 [ -z "$DEFAULT_HOST_NAME" ] && DEFAULT_HOST_NAME=$HOSTNAME
 
+# Common string filter
+# Usage: set "$(pmg_filter $*)"
+pmg_filter() {
+    echo "$(
+        echo "$*" \
+        | sed "s/@$PMG:\([^ ]\+\)/\1/g" \
+        | sed "s/@!$PMG:[^ :]\+//g" \
+        | sed 's/@![^ :]\+:\([^ :]\+\)/\1/g' \
+        | sed 's/@[^ :]\+:[^ :]\+//g' \
+        | sed 's/ \+/ /g' \
+        | sed 's/^ \+//g' \
+        | sed 's/ \+$//g' \
+    )"
+}
+
 # Has Command
 has() {
+    set "$(pmg_filter $*)"
     for CMD in $@
     do
         [ -z "$(command -v $CMD)" ] && return 1
@@ -31,6 +47,7 @@ not_has() { if has $@; then return 1; else return 0; fi; }
 
 # Is All Input Package Installed
 is_installed() {
+    set "$(pmg_filter $*)"
     for CMD in $@
     do
         [ "$PMG" = "apt" -o "$PMG" = "termux" ] && [ -z "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
@@ -41,6 +58,7 @@ is_installed() {
 
 # Is All Input Package Not Installed
 not_installed() {
+    set "$(pmg_filter $*)"
     for CMD in $@
     do
         [ "$PMG" = "apt" -o "$PMG" = "termux" ] && [ -n "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
@@ -58,6 +76,18 @@ only_support() {
     done
     echo "Unsupported package manager '$PMG'" >&2
     exit 1
+}
+
+# Not support specified package manager
+not_support() {
+    [ "$1" = "-f" ] && return 0
+    for CMD in $@
+    do
+        [ "$PMG" = "$CMD" ] \
+            && echo "Unsupported package manager '$PMG'" >&2 \
+            && exit 1
+    done
+    return 0
 }
 
 # Not support docker

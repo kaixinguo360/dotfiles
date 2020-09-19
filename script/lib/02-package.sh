@@ -6,6 +6,7 @@
 install_pkg() {
     [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
     [ -z "$1" ] && return 0
+    set "$(pmg_filter $*)"
     [ -z "$FORCE" ] && {
         is_installed $@ && { echo "Packages '$@' installed"; return 0; }
     }
@@ -88,6 +89,7 @@ install_tool() {
 remove_pkg() {
     [ "$1" = "-f" ] && { FORCE='-f'; shift; } || FORCE=''
     [ -z "$1" ] && return 0
+    set "$(pmg_filter $*)"
     [ -z "$FORCE" ] && {
         not_installed $@ && { echo "Packages '$@' not installed"; return 0; }
     }
