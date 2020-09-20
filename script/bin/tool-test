@@ -1,14 +1,16 @@
 #!/bin/bash
 
-[ -z "$@" ] && {
+[ -z "$*" ] && {
     echo "Usage: ${0##*/} TOOL..."
     echo "Test tools"
-    echo "Use \`\$TOOL_TEST_CMD TOOL\` to test every TOOL"
+    echo "Use \`\$TOOL_TEST_CMD\` to test every TOOL"
+    echo "Use \`{}\` to replace the TOOL to test ({} => TOOL)";
     exit 0
 }
 
 [ -z "$TOOL_TEST_CMD" ] && {
     echo "Please set environment variable '\$TOOL_TEST_CMD'!";
+    echo "Tip: Use \`{}\` to replace the TOOL to test ({} => TOOL)";
     exit 1;
 }
 
@@ -19,8 +21,10 @@ rm -f $LOG_DIR/*.log
 
 for TOOL in $@
 do
+    CMD="$(echo "$TOOL_TEST_CMD"|sed "s/{}/$TOOL/g")"
+    echo "+ $CMD"
     echo -n "Testing '$TOOL'... " \
-        && $TOOL_TEST_CMD $TOOL \
+        && bash -c "$CMD" \
             > "$LOG_DIR/$TOOL.log" \
         && rm "$LOG_DIR/$TOOL.log" \
         && echo passed. \
