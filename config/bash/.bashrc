@@ -128,6 +128,10 @@ do
     source "$file"
 done
 
+# Tool bashrc
+# include $ROOT/script/bin/*.bashrc
+source $(realpath $HOME/.bashrc.d)/../../../script/bin/*.bashrc
+
 # Auto-generated bin
 # include ~/.local/bin to PATH
 PATH="$HOME/.local/bin:$PATH"

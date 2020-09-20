@@ -11,9 +11,9 @@ PMG="unkown"
 [ -n "$IS_TERMUX" ] && PMG="termux"
 
 # Get Tmp Dir
-[ "$PMG" = "apk" ] && TMP_DIR="/tmp"
-[ "$PMG" = "apt" ] && TMP_DIR="/tmp"
-[ "$PMG" = "termux" ] && TMP_DIR=$(realpath "$HOME/../usr/tmp")
+[ "$PMG" = "apk" ] && TMP_PATH="/tmp"
+[ "$PMG" = "apt" ] && TMP_PATH="/tmp"
+[ "$PMG" = "termux" ] && TMP_PATH=$(realpath "$HOME/../usr/tmp")
 
 # Default Arguments
 [ -z "$DEFAULT_PASSWORD" ] && DEFAULT_PASSWORD=1234567

@@ -38,7 +38,7 @@ download_and_run() {
     # Verify arguments
     [ -z "$REMOTE_SCRIPT" ] && return 1
     [ -z "$SCRIPT_NAME" ] && echo "[ERROR] download_and_run: Please input \$2(SCRIPT_NAME)" >&2 && return 1
-    local LOCAL_SCRIPT=$(realpath -m "$TMP_DIR/script/$SCRIPT_NAME")
+    local LOCAL_SCRIPT=$(realpath -m "$TMP_PATH/script/$SCRIPT_NAME")
 
     # Download
     echo "Downloading remote script '$SCRIPT_NAME' from '$REMOTE_SCRIPT'... " \

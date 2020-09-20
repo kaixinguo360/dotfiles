@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# Load libs
+. $(dirname $(realpath $0))/lib.sh
+
+# Show Help Info
+if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];then
+    echo "Usage: ${0##*/} [-i] TOOL [OPTION]..."
+    echo "Quick edit remove-tool"
+    exit 0
+fi
+
+# Set Paramters
+TOOL="$*"
+has nano && EDITOR="nano"
+has vi && EDITOR="vi"
+has vim && EDITOR="vim"
+
+# Pre Edit
+if [ "${TOOL##*.}" = "list" ];then
+    TOOL_PATH="$(realpath $ROOT_PATH/../lists/$TOOL)"
+else
+    [ "${TOOL##*.}" = "sh" ] \
+        && TOOL=remove_$TOOL \
+        || TOOL=remove_$TOOL.sh
+    TOOL_PATH="$(realpath $ROOT_PATH/../script/remove/$TOOL)"
+fi
+[ ! -f "$TOOL_PATH" ] && IS_NEW_TOOL=yes
+
+# Edit
+mkdir -p "$TMP_PATH/tool"
+cp -a "$TOOL_PATH" "$TMP_PATH/tool/$TOOL.old"
+$EDITOR "$TOOL_PATH"
+[ -z "$(diff -q $TMP_PATH/tool/$TOOL.old $TOOL_PATH)" ] \
+    && echo "No modification made" \
+    && return 0
+
+#Post Edit
+[ -n "$IS_NEW_TOOL" ] \
+    && echo "Created new tool: $TOOL ($TOOL_PATH)" \
+    || echo "Updated tool: $TOOL ($TOOL_PATH)"

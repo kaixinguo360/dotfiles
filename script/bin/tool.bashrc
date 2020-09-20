@@ -10,6 +10,9 @@ complete -F _installable_tools tool-installs
 complete -F _removable_tools tool-remove
 complete -F _removable_tools tool-removes
 
+complete -F _installable_tools tool-install-edit
+complete -F _removable_tools tool-remove-edit
+
 complete -F _installable_tools tool-test
 
 # Bash-Completion Function #
