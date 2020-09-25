@@ -31,7 +31,7 @@ $sudo sed -i "/^$(echo $SHARE_DIR|sed 's#/#\\/#g')/d" /etc/exports
 $sudo bash -c "echo '$SHARE_DIR *(rw,sync,no_root_squash,no_subtree_check)' >> /etc/exports"
 restart_service nfs-kernel-server
 
-# Config UFW
-has ufw && $sudo ufw allow 2049
+# Expose ports
+expose_port 2049
 
 exit 0

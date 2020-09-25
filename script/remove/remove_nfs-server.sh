@@ -22,7 +22,7 @@ echo '----------------'
 # Remove NFS-Server
 remove_pkg nfs-kernel-server nfs-common
 
-# Config UFW
-has ufw && $sudo ufw delete allow 2049
+# Close ports
+close_port 2049
 
 exit 0

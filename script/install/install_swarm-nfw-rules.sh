@@ -7,14 +7,11 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
     exit 0
 fi
 
-# Config UFW
-has ufw && {
-    $sudo ufw allow 2376/tcp
-    $sudo ufw allow 2377/tcp
-    $sudo ufw allow 7946/tcp
-    $sudo ufw allow 7946/udp
-    $sudo ufw allow 4789/udp 
-    $sudo ufw reload
-}
+# Expose ports
+expose_port 2376/tcp
+expose_port 2377/tcp
+expose_port 7946/tcp
+expose_port 7946/udp
+expose_port 4789/udp
 
 exit 0

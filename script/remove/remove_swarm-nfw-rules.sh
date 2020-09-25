@@ -7,14 +7,11 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
     exit 0
 fi
 
-# Config UFW
-has ufw && {
-    $sudo ufw delete allow 2376/tcp
-    $sudo ufw delete allow 2377/tcp
-    $sudo ufw delete allow 7946/tcp
-    $sudo ufw delete allow 7946/udp
-    $sudo ufw delete allow 4789/udp 
-    $sudo ufw reload
-}
+# Close ports
+close_port 2376/tcp
+close_port 2377/tcp
+close_port 7946/tcp
+close_port 7946/udp
+close_port 4789/udp
 
 exit 0

@@ -170,7 +170,12 @@ need() {
     done
 }
 
+###########
+# Sercice #
+###########
+
 # Start Service
+# Usage: start_service SERVICE_NAME
 start_service() {
     only_support apt
     echo -n "Starting $1 service... " \
@@ -180,6 +185,7 @@ start_service() {
 }
 
 # Stop Service
+# Usage: stop_service SERVICE_NAME
 stop_service() {
     only_support apt
     echo -n "Stopping $1 service... " \
@@ -188,12 +194,45 @@ stop_service() {
 }
 
 # Retart Service
+# Usage: restart_service SERVICE_NAME
 restart_service() {
     only_support apt
     echo -n "Restarting $1 service... " \
         && $SUDO service $1 restart >/dev/null \
         && echo 'done.'
 }
+
+########
+# Port #
+########
+
+# Expose port
+# Usage: expose_port PORT
+expose_port() {
+    local PORT=$1
+    echo -n "Exposing port '$PORT'... " \
+        && _expose_port $PORT >/dev/null \
+        && echo 'done.'
+}
+_expose_port() {
+    has ufw && $SUDO ufw allow $1
+}
+
+# Close port
+# Usage: close_port PORT
+close_port() {
+    local PORT=$1
+    echo -n "Closing port '$PORT'... " \
+        && _close_port $PORT >/dev/null \
+        && echo 'done.'
+}
+_close_port() {
+    has ufw && $SUDO ufw delete allow $1
+}
+
+####################
+# Termux Pointless #
+####################
 
 # Install Pointless source
 install_pointless() {

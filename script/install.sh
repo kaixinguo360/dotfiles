@@ -16,7 +16,10 @@ ROOT_PATH=.; for LIB in $ROOT_PATH/lib/??-*.sh; do . "$LIB"; done
 [ "$1" = "-i" ] && { INTERACTIVE='-i'; shift; } || { INTERACTIVE=''; }
 [ -z "$*" ] && TOOLS="default.list config.sh" || TOOLS="$@"
 
-install/install_cnsrc.sh
+# Use mirror 
+#install/install_cnsrc.sh
+
+# Install bash
 has bash || { install_pkg bash; }
 
 # Install tools
