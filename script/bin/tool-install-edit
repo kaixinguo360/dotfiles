@@ -16,7 +16,7 @@ has nano && EDITOR="nano"
 has vi && EDITOR="vi"
 has vim && EDITOR="vim"
 
-# Pre Edit
+# Pre Edit: Set Params
 if [ "${TOOL##*.}" = "list" ];then
     TOOL_PATH="$(realpath $ROOT_PATH/../lists/$TOOL)"
 else
@@ -27,15 +27,22 @@ else
 fi
 [ ! -f "$TOOL_PATH" ] && IS_NEW_TOOL=yes
 
-# Edit
+# Pre Edit: Backup
 mkdir -p "$TMP_PATH/tool"
-cp -a "$TOOL_PATH" "$TMP_PATH/tool/$TOOL.old"
+[ -z "$IS_NEW_TOOL" ] \
+    && cp -a "$TOOL_PATH" "$TMP_PATH/tool/$TOOL.old"
+
+# Edit
 $EDITOR "$TOOL_PATH"
-[ -z "$(diff -q $TMP_PATH/tool/$TOOL.old $TOOL_PATH)" ] \
-    && echo "No modification made" \
-    && return 0
 
 #Post Edit
-[ -n "$IS_NEW_TOOL" ] \
-    && echo "Created new tool: $TOOL ($TOOL_PATH)" \
-    || echo "Updated tool: $TOOL ($TOOL_PATH)"
+if [ -n "$IS_NEW_TOOL" ]; then
+    [ -f "$TOOL_PATH" ] \
+        && chmod +x "$TOOL_PATH" \
+        && echo "Created new tool: $TOOL ($TOOL_PATH)" \
+        || echo "Canceled."
+else
+    [ -n "$(diff -q $TMP_PATH/tool/$TOOL.old $TOOL_PATH)" ] \
+        && echo "Updated tool: $TOOL ($TOOL_PATH)" \
+        || echo "No modification made"
+fi
