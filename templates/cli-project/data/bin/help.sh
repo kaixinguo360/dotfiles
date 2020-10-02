@@ -4,7 +4,7 @@
 
 CMD=$1
 
-cd bin
+cd $MYEXAMPLE_HOME/bin
 if [ "$CMD" = "" ];then # if
 
 cat <<HERE

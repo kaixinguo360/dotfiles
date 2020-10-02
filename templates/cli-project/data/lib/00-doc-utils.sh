@@ -1,6 +1,7 @@
-#!/bin/bash
+# Document Utils #
 
-function doc() {
+# Usage: doc PATH_TO_CMD
+doc() {
     local file=$1
     local flag=$2
     local num=0
@@ -20,7 +21,8 @@ function doc() {
     return 0
 }
 
-function print_help() {
+# Usage: print_help [CMD]
+print_help() {
     local cmd=${1:-$MYEXAMPLE_CMD}
 
     doc $MYEXAMPLE_HOME/bin/$cmd.sh u && echo
@@ -31,20 +33,3 @@ function print_help() {
     return 0
 }
 
-function traverse() {
-    local current_dir=$1
-    local last_dir=
-    while [ true ]
-    do
-        if [ -d "$current_dir/.myexample" ];then
-            echo $current_dir
-            exit
-        fi
-        last_dir=$current_dir
-        current_dir=$(dirname $current_dir)
-        if [ "$current_dir" = "$last_dir" ];then
-            echo "fatal: Not a myexample repository (or any of the parent directories)">&2
-            exit 128
-        fi
-    done
-}
