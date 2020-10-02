@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Get $CURRENT_DIR
+CURRENT_DIR=$(realpath $(pwd))
+
+# Get $MYEXAMPLE_HOME
+MYEXAMPLE_HOME=$(dirname $(realpath $0))
+cd $MYEXAMPLE_HOME
+
+# Get $MYEXAMPLE_CMD
+[ "$1" = "" -o "$1" = "--help" -o "$1" = "-h" ] \
+    && MYEXAMPLE_CMD='help' \
+    || MYEXAMPLE_CMD=$1
+shift
+
+# Check $MYEXAMPLE_CMD
+[ ! -f "bin/$MYEXAMPLE_CMD.sh" ] && {
+    echo "myexample: '$MYEXAMPLE_CMD' is not a myexample command. See '${0##*/} --help'.">&2
+    exit 1
+}
+
+# Load lib/*
+for LIB in $MYEXAMPLE_HOME/lib/*.sh
+do
+    . "$LIB"
+done
+
+# Print Help
+[ "$1" = "--help" ] && print_help && exit 0
+
+# Run $MYEXAMPLE_CMD
+. bin/$MYEXAMPLE_CMD.sh $@
