@@ -8,6 +8,7 @@ curl
 file
 tree
 jq
+@apt:apt-utils
 @!apk:man
 @apk:mandoc
 @!apk:dnsutils
