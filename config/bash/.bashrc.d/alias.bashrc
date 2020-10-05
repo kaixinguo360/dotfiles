@@ -19,3 +19,4 @@ alias upgradedotfile='(cd $HOME/.bashrc.d; \
 alias bench.sh='curl -Lso- bench.sh | bash'
 s() { sudo bash -ic "$*"; }
 complete -F _command s
+forceumount() { fusermount -u $1 || sudo umount -l $1; }
