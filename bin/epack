@@ -1,0 +1,174 @@
+#!/bin/bash
+
+# DATA_SRC #
+DATA_SRC=$(
+cat << 'HERE0'
+#!/bin/bash
+
+MARK_WORD="ENCRYPTED_DATA"
+MARK_TOKEN="[-#_$%&*@]"
+MARK_NUM=3
+
+if [ "$1" = "-e" ]; then # if
+shift
+
+# Encrypt #
+
+merge_data() {
+    local mt=$MARK_TOKEN
+    local mb=$(echo "BEGIN_$MARK_WORD"|sed 's/_/\\s\\+/g')
+    local me=$(echo "END_$MARK_WORD"|sed 's/_/\\s\\+/g')
+    local data=$(cat|sed -e '1h;2,$H;$!d;g' -e 's/\n/\\n/g')
+    [ -z "$data" ] && exit 1
+    sed -i "$1"\
+        -e '1h;2,$H;$!d;g' \
+        -e "s@\(\s*$mt\{4,\}\s*$mb\s*$mt\{4,\}\s*\n\).*\(\s*$mt\{4,\}\s*$me\s*$mt\{4,\}\s*\)@\1$data\n\2@Ig" \
+        || echo "Open file failed! ($?)" >&2 \
+        && exit 1
+}
+
+encrypt_data() {
+    cat "${1:-/dev/stdin}" \
+        | openssl aes-256-ecb -base64 -md sha512 2>/dev/null \
+        || echo "Encryption failed! ($?)" >&2 \
+        && exit 1
+}
+
+encode_data() {
+    cat "${1:-/dev/stdin}" \
+        | cat
+}
+
+data=$(cat)
+[ -z "$data" ] \
+    && echo "No input." >&2 \
+    && exit 1
+echo "$data" \
+    | encode_data \
+    | encrypt_data \
+    | merge_data "${1:-$0}"
+
+else # else
+
+# Decrypt #
+
+read_file() {
+    cat "${1:-/dev/stdin}" \
+        || echo "Open file failed! ($?)" >&2 \
+        && exit 1
+}
+
+extract_data() {
+    local mt=$MARK_TOKEN
+    local mb=$(echo "BEGIN_$MARK_WORD"|sed 's/_/\\s\\+/g')
+    local me=$(echo "END_$MARK_WORD"|sed 's/_/\\s\\+/g')
+    cat "${1:-/dev/stdin}" \
+        | sed -n "/^\s*$mt\{4,\}\s*$mb\s*$mt\{4,\}\s*$/I,//p" \
+        | sed -n "0,/^\s*$mt\{4,\}\s*$me\s*$mt\{4,\}\s*$/Ip" \
+        | sed '1d;$d'
+}
+
+decrypt_data() {
+    cat "${1:-/dev/stdin}" \
+        | openssl aes-256-ecb -base64 -md sha512 -d 2>/dev/null \
+        || echo "Decryption failed! ($?)" >&2 \
+        && exit 1
+}
+
+decode_data() {
+    cat "${1:-/dev/stdin}" \
+        | cat
+}
+
+read_file "${1:-$0}" \
+    | extract_data \
+    | decrypt_data \
+    | decode_data \
+    | cat
+
+fi # fi
+
+exit 0
+
+-----BEGIN ENCRYPTED DATA-----
+-----END ENCRYPTED DATA-----
+
+HERE0
+)
+
+# DATA_BIN #
+DATA_BIN=$(
+echo "$DATA_SRC" \
+    | sed -n '0,/^exit 0$/p' \
+    | sed 's/\s\+#.*$//g' \
+    | sed 's/^#.*$//g' \
+    | sed -e '1h;2,$H;$!d;g' -e 's/\\\n\s*/ /g' \
+    | sed -e '1h;2,$H;$!d;g' -e 's/then\n\s*/then /g' \
+    | sed -e '1h;2,$H;$!d;g' -e 's/else\n\s*/else /g' \
+    | sed -e '1h;2,$H;$!d;g' -e 's/{\n\s*/{ /g' \
+    | sed '/^\s*$/d' \
+    | sed -e '1h;2,$H;$!d;g' -e 's/\n\s*/; /g'
+cat << HERE
+-----BEGIN ENCRYPTED DATA-----
+-----END ENCRYPTED DATA-----
+HERE
+)
+
+# DATA_GEN #
+DATA_GEN=$(
+
+# Part 1
+cat << 'HERE1'
+#!/bin/bash
+[ -z "$1" ] \
+    && echo "No target!" \
+    && exit 1
+[ -f "$1" ] \
+    && echo "Target exists!" \
+    && exit 1
+cat > "$1" << 'HERE'
+HERE1
+
+# Part 2
+echo "$DATA_BIN"
+
+# Part 3
+cat << 'HERE3'
+HERE
+chmod +x "$1"
+HERE3
+
+)
+
+# CMD_GEN #
+if [ "$1" = "gen" ]; then shift
+    bash -c "$DATA_GEN" -- "$@"
+    exit
+fi
+
+# CMD_EDIT #
+if [ "$1" = "edit" ]; then shift
+    [ ! -f "$1" ] \
+        && echo "No such pack: $1" >&2 \
+        && exit 1
+    bash -c "$DATA_SRC" -- -e "$@"
+    exit
+fi
+
+# CMD_HELP #
+if [ -z "$1" -o "$1" = "-h" -o "$1" = "--help" -o "$1" = "help" ]; then
+    echo "Usage; $(basename $0) <command> <arguments>"...
+    echo "Encryption package generator"
+    echo
+    echo "Commands"
+    echo "  gen <target>  generate a empty encryption package"
+    echo "  edit <pack>   edit an existing package"
+    echo "  help          print this help info"
+    echo
+    echo "Use './path_to_pack' to open existing package"
+    echo "Use './path_to_pack -e' to edit existing package"
+    exit
+fi
+
+echo "Unknown command: $1"
+exit 1
