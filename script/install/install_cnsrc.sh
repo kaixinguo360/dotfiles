@@ -13,11 +13,27 @@ only_support $1 apt termux apk
 # apt
 [ "$PMG" = "apt" ] && {
 cd /etc/apt
+#echo -n "Changing apt source to 'mirrors.aliyun.com'... " \
+#    && $SUDO cp sources.list sources.list.bak \
+#    && $SUDO sed -i 's@\(deb-*s*r*c*\) \+\(https*://[^ ]*\) \+\([^ ]*\) \+\([^ ]*\)\(.*\)@\1 http://mirrors.aliyun.com/ubuntu/ \3 \4\5@' sources.list \
+#    && echo done.
 echo -n "Changing apt source to 'mirrors.aliyun.com'... " \
     && $SUDO cp sources.list sources.list.bak \
-    && $SUDO sed -i 's@\(deb-*s*r*c*\) \+\(https*://[^ ]*\) \+\([^ ]*\) \+\([^ ]*\)\(.*\)@\1 http://mirrors.aliyun.com/ubuntu/ \3 \4\5@' sources.list \
-    && echo done.
-echo -n 'Updating apt... ' \
+    && $SUDO bash -ic 'cat > sources.list' << HERE
+deb http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse
+HERE
+[ "$?" = "0" ] \
+    && echo done. \
+    && echo -n 'Updating apt... ' \
     && $SUDO apt-get update -q \
         > /tmp/update_apt.log \
     && rm /tmp/update_apt.log \
