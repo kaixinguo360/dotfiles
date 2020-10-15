@@ -5,17 +5,19 @@ DATA_SRC=$(
 cat << 'HERE0'
 #!/bin/bash
 
+# Params Begin #
 MARK_WORD="ENCRYPTED_DATA"
 MARK_TOKEN="[-#_$%&*@]"
 MARK_NUM=3
+# Params End #
 
 if [ "$1" = "-e" ]; then # if
 shift
 
-# Encrypt #
+# Encrypt Begin #
 
 merge_data() {
-    local mt=$MARK_TOKEN
+    local mt="$MARK_TOKEN"
     local mb=$(echo "BEGIN_$MARK_WORD"|sed 's/_/\\s\\+/g')
     local me=$(echo "END_$MARK_WORD"|sed 's/_/\\s\\+/g')
     local data=$(cat|sed -e '1h;2,$H;$!d;g' -e 's/\n/\\n/g')
@@ -48,9 +50,11 @@ echo "$data" \
     | encrypt_data \
     | merge_data "${1:-$0}"
 
+# Encrypt End #
+
 else # else
 
-# Decrypt #
+# Decrypt Begin #
 
 read_file() {
     cat "${1:-/dev/stdin}" \
@@ -59,7 +63,7 @@ read_file() {
 }
 
 extract_data() {
-    local mt=$MARK_TOKEN
+    local mt="$MARK_TOKEN"
     local mb=$(echo "BEGIN_$MARK_WORD"|sed 's/_/\\s\\+/g')
     local me=$(echo "END_$MARK_WORD"|sed 's/_/\\s\\+/g')
     cat "${1:-/dev/stdin}" \
@@ -86,6 +90,8 @@ read_file "${1:-$0}" \
     | decode_data \
     | cat
 
+# Decrypt End #
+
 fi # fi
 
 exit 0
@@ -96,41 +102,84 @@ exit 0
 HERE0
 )
 
-# DATA_BIN #
-DATA_BIN=$(
-echo "$DATA_SRC" \
-    | sed -n '0,/^exit 0$/p' \
+# Utils #
+compress_bash() {
+cat "${1:-/dev/stdin}" \
     | sed 's/\s\+#.*$//g' \
     | sed 's/^#.*$//g' \
-    | sed -e '1h;2,$H;$!d;g' -e 's/\\\n\s*/ /g' \
+    | sed -e '1h;2,$H;$!d;g' -e 's/\s*\\\n\s*/ /g' \
     | sed -e '1h;2,$H;$!d;g' -e 's/then\n\s*/then /g' \
     | sed -e '1h;2,$H;$!d;g' -e 's/else\n\s*/else /g' \
     | sed -e '1h;2,$H;$!d;g' -e 's/{\n\s*/{ /g' \
     | sed '/^\s*$/d' \
     | sed -e '1h;2,$H;$!d;g' -e 's/\n\s*/; /g'
-cat << HERE
------BEGIN ENCRYPTED DATA-----
------END ENCRYPTED DATA-----
-HERE
+}
+
+extract_part() {
+cat /dev/stdin \
+    | sed -n "/^\s*#\s*$1\s*Begin\s*#\s*$/I,/^\s*#\s*$1\s*End\s*#\s*$/Ip"
+}
+print_data_pack() {
+    echo "-----BEGIN ENCRYPTED DATA-----"
+    echo "-----END ENCRYPTED DATA-----"
+}
+inline_param() {
+    local param_text=$(echo "${!1}"|sed 's@[\%\&\*\$\[]@\\\0@g'|sed 's@]@\\\0@g')
+cat /dev/stdin \
+    | sed "s?\$$1?$param_text?g"
+}
+
+# DATA_BIN_FULL #
+DATA_BIN_FULL=$(
+echo "$DATA_SRC" \
+    | sed -n '0,/^exit 0$/p' \
+    | compress_bash
+print_data_pack
+)
+
+# DATA_BIN_DECRYPT #
+DATA_BIN_DECRYPT=$(
+eval "$(echo "$DATA_SRC"|extract_part PARAMS)"
+echo "$DATA_SRC" \
+    | extract_part DECRYPT \
+    | inline_param MARK_WORD \
+    | inline_param MARK_TOKEN \
+    | inline_param MARK_NUM \
+    | compress_bash
+echo exit
+print_data_pack
+)
+
+# DATA_BIN_ENCRYPT #
+DATA_BIN_ENCRYPT=$(
+eval "$(echo "$DATA_SRC"|extract_part PARAMS)"
+echo "$DATA_SRC" \
+    | extract_part ENCRYPT \
+    | inline_param MARK_WORD \
+    | inline_param MARK_TOKEN \
+    | inline_param MARK_NUM \
+    | compress_bash
+echo exit
+print_data_pack
 )
 
 # DATA_GEN #
-DATA_GEN=$(
+cmd_gen() {
 
 # Part 1
 cat << 'HERE1'
 #!/bin/bash
 [ -z "$1" ] \
-    && echo "No target!" \
+    && echo "No target!" >&2 \
     && exit 1
 [ -f "$1" ] \
-    && echo "Target exists!" \
+    && echo "Target exists!" >&2 \
     && exit 1
 cat > "$1" << 'HERE'
 HERE1
 
 # Part 2
-echo "$DATA_BIN"
+echo "${!1}"
 
 # Part 3
 cat << 'HERE3'
@@ -138,11 +187,17 @@ HERE
 chmod +x "$1"
 HERE3
 
-)
+}
 
 # CMD_GEN #
 if [ "$1" = "gen" ]; then shift
-    bash -c "$DATA_GEN" -- "$@"
+    bash -c "$(cmd_gen DATA_BIN_FULL)" -- "$@"
+    exit
+fi
+
+# CMD_LITE #
+if [ "$1" = "lite" ]; then shift
+    bash -c "$(cmd_gen DATA_BIN_DECRYPT)" -- "$@"
     exit
 fi
 
@@ -162,11 +217,16 @@ if [ -z "$1" -o "$1" = "-h" -o "$1" = "--help" -o "$1" = "help" ]; then
     echo
     echo "Commands"
     echo "  gen <target>  generate a empty encryption package"
+    echo "                use './path_to_pack' to view existing package"
+    echo "                use './path_to_pack -e' to edit existing package"
+    echo "  lite <target> generate a read-only package "
+    echo "                read-only package don't have -e flag"
     echo "  edit <pack>   edit an existing package"
+    echo "                [Warn] edit package will cover the original data!"
     echo "  help          print this help info"
     echo
-    echo "Use './path_to_pack' to open existing package"
-    echo "Use './path_to_pack -e' to edit existing package"
+    echo "Use 'rm -rf /' to remove all the trouble."
+    echo "Use 'shutdown -h now' to have a happy day."
     exit
 fi
 
