@@ -3,13 +3,13 @@
 
 # Show Help Info
 if [[ $1 = "-h" || $1 = "--help" ]];then
-    echo -e "Install nfs-clinet"
+    echo -e "Install nfs-client"
     exit 0
 fi
 
 # Check Dependencies
 only_support $1 apt
-has nfsstat && [ "$1" != "-f" ] && echo 'nfs-clinet installed' && exit 0
+has nfsstat && [ "$1" != "-f" ] && echo 'nfs-client installed' && exit 0
 [ "$1" = "-f" ] && shift
 
 # Read Input
