@@ -16,8 +16,8 @@ install_pkg() {
         [ -z "$IS_UPDATED" ] && { 
             echo -n " - updating... " \
                 && $SUDO apt-get update -q \
-                    > /tmp/install_pkg.log \
-                && rm /tmp/install_pkg.log \
+                    > $TMP_PATH/install_pkg.log \
+                && rm $TMP_PATH/install_pkg.log \
                 && export IS_UPDATED='y' \
                 && echo "done."
         }
@@ -27,16 +27,16 @@ install_pkg() {
                 -o Dpkg::Options::="--force-confold" \
                 --no-install-recommends \
                 -y -q $@ \
-                > /tmp/install_pkg.log \
-            && rm /tmp/install_pkg.log \
+                > $TMP_PATH/install_pkg.log \
+            && rm $TMP_PATH/install_pkg.log \
             && echo "done."
         return
     }
     [ "$PMG" = "apk" ] && {
         echo -n " - installing... " \
             && $SUDO apk add --no-cache $@ \
-                > /tmp/install_pkg.log \
-            && rm /tmp/install_pkg.log \
+                > $TMP_PATH/install_pkg.log \
+            && rm $TMP_PATH/install_pkg.log \
             && echo "done."
         return
     }
@@ -101,16 +101,16 @@ remove_pkg() {
                 -o Dpkg::Options::="--force-confold" \
                 --auto-remove \
                 -y -q $@ \
-                > /tmp/remove_pkg.log \
-            && rm /tmp/remove_pkg.log \
+                > $TMP_PATH/remove_pkg.log \
+            && rm $TMP_PATH/remove_pkg.log \
             && echo done.
         return
     }
     [ "$PMG" = "apk" ] && {
         echo -n " - removing... " \
             && SUDO apk del --no-cache $@ \
-                > /tmp/remove_pkg.log \
-            && rm /tmp/remove_pkg.log \
+                > $TMP_PATH/remove_pkg.log \
+            && rm $TMP_PATH/remove_pkg.log \
             && echo done.
         return
     }
@@ -236,7 +236,7 @@ _close_port() {
 
 # Install Pointless source
 install_pointless() {
-    [[ -n "$NEED_POINTLESS" ]] && {
+    [ -n "$NEED_POINTLESS" ] && {
         unset NEED_POINTLESS
         need wget bash 'apt -f'
         wget https://its-pointless.github.io/setup-pointless-repo.sh -O setup-pointless-repo.sh

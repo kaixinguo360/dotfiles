@@ -38,8 +38,8 @@ Dockerfile`
     # Build tagrget docker image
     echo -n "Building image '$TARGET_IMAGE'... " \
         && echo "$DOCKERFILE" | $CMD \
-            > /tmp/build_local_docker_image.log \
-        && rm /tmp/build_local_docker_image.log \
+            > $TMP_PATH/build_local_docker_image.log \
+        && rm $TMP_PATH/build_local_docker_image.log \
         && echo done.
 
     # Clean docker images

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Load libs
+. $(dirname $(realpath $0))/lib.sh
+
 [ -z "$*" ] && {
     echo "Usage: ${0##*/} TOOL..."
     echo "Test tools"
@@ -14,7 +17,7 @@
     exit 1;
 }
 
-LOG_DIR="/tmp/tool-test-log"
+LOG_DIR="$TMP_PATH/tool-test-log"
 
 mkdir -p "$LOG_DIR"
 rm -f $LOG_DIR/*.log

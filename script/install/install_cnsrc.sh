@@ -35,8 +35,8 @@ HERE
     && echo done. \
     && echo -n 'Updating apt... ' \
     && $SUDO apt-get update -q \
-        > /tmp/update_apt.log \
-    && rm /tmp/update_apt.log \
+        > $TMP_PATH/update_apt.log \
+    && rm $TMP_PATH/update_apt.log \
     && echo done.
 exit 0
 }
