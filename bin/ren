@@ -1,91 +1,130 @@
 #!/bin/bash
 
-# Default params #
+# Default Params #
 LOG1=       # Log Leve 1
 LOG2=yes    # Log Leve 2
 DRY_RUN=yes
-MODE=url
-IEXT=       # Ignore Extension
-COMMAND=
-PATTERN=
+TARGET_DIRNAME=
 
-# Mode #
-url() { urldecode "$sbase"; }
-sha() { sha1sum "$spath"|cut -d ' ' -f1; }
-md5() { md5sum "$spath"|cut -d ' ' -f1; }
+# Extract Extension #
+IS_EXTRACT_EXT=
+DEFAULT_EXT=
 
-# Get Name #
-getname() {
-    if [ -n "$COMMAND" ]; then
-        tbase=$(eval $(echo "$COMMAND" \
-            | sed 's#{}#{base}#' \
-            | sed 's#{\(.*\)}#${s\1}#' \
-        ))
-    elif [ -n "$PATTERN" ]; then
-        tbase=$(eval echo $(echo "$PATTERN" \
-            | sed 's#{}#{base}#' \
-            | sed 's#{\(.*\)}#${s\1}#' \
-        ))
-    else
-        tbase=$($MODE) || exit 1
-    fi
+# Pattern String #
+NAME_PATTERN='new_$s_name'
+COMMAND_PATTERN='mv \"$s_path\" \"$t_path\"'
+
+# -----------------------------
+# s_path(path)=/mnt/foo/a.out
+# -----------------------------
+# s_fullname(full,fullname)=a.out
+# s_basename(base,basename)=a
+# s_dirname(dir,dirname)=/mnt/foo
+# s_extname(ext,extname)=out
+# -----------------------------
+# IS_EXTRACT_EXT=(true)
+# s_name(name)=a
+# -----------------------------
+# IS_EXTRACT_EXT=(false)
+# s_name(name)=a.out
+# -----------------------------
+
+# Utils functions #
+url() { urldecode "$s_basename"; }
+sha() { sha1sum "$s_path"|cut -d ' ' -f1; }
+md5() { md5sum "$s_path"|cut -d ' ' -f1; }
+
+# Log functions #
+log_debug() { [ -n "$LOG1" ] && printf "\033[34m[DEBUG] $1\033[0m\n" >&2; }
+log_info() { [ -n "$LOG2" ] && printf "[INFO] $1\n"; }
+log_warn() { [ -n "$LOG2" ] && printf "\033[33m[WARN] $1\033[0m\n" >&2; }
+log_error() { [ -n "$LOG2" ] && printf "\033[31m[ERROR] $1\033[0m\n" >&2; }
+
+# Generate Target Name #
+gen_target_name() {
+    t_basename=$(eval echo $(echo "$NAME_PATTERN" \
+        | sed 's#\(%[0-9]*d\)#$(printf \1 $id)#g' \
+        | sed 's#{}#{name}#g' \
+        | sed 's#{\(full\|base\|dir\|ext\)}#{\1name}#g' \
+        | sed 's#{\([^{}]*\)}#${s_\1}#g' \
+    ))
 }
 
 # Main #
-renameimage() {
+main() {
+
+    id=$((id+1))
+
     [ -f "$1" ] || {
-        [ -n "$LOG1" ] && echo -e "\033[31mNot a regular file: $1\033[0m"
+        log_error "Not a regular file: $1"
         return 1
     }
 
     # ---- begin ---- #
-    spath=$(realpath -s "$1")
-    sdirname=${spath%/*}
-    sname=${spath##*/}
-
-    if [ -z "$IEXT" -a -n "$(echo $sname|grep '\.')" ]; then
-        sext=${sname##*.}
-        sbase=${sname%.*}
-        getname
-        tname=$tbase.$sext
-        info="$sdirname/{$sbase => $tbase}.$sext"
+    s_path=$(realpath -s "$1")
+    s_dirname=${s_path%/*}
+    s_fullname=${s_path##*/}
+    s_basename=${s_fullname%.*}
+    
+    # Get s_extname
+    has_ext="$(echo $s_fullname|grep '\.')"
+    if [ -n "$has_ext" ]; then
+        s_extname=${s_fullname##*.}
     else
-        sbase=$sname
-        getname
-        tname=$tbase
-        info="$sdirname/{$sbase => $tbase}"
+        s_extname=''
     fi
 
-    tpath=$sdirname/$tname
+    if [ -n "$IS_EXTRACT_EXT" -a -n "$has_ext" ] || [ -n "$DEFAULT_EXT" ]; then
+        s_extname=${s_fullname##*.}
+        s_name=${s_fullname%.*}
+        gen_target_name
+        t_extname=${DEFAULT_EXT:-$s_extname}
+        t_fullname=$t_basename.$t_extname
+    else
+        s_name=$s_fullname
+        gen_target_name
+        t_extname=''
+        t_fullname=$t_basename
+    fi
+
+    t_name=${t_basename}
+    t_dirname=${TARGET_DIRNAME:-$s_dirname}
+    t_path=$t_dirname/$t_fullname
     # ---- end ---- #
 
-    # Skip
-    [ "$sbase" = "$tbase" ] && {
-        [ -n "$LOG1" ] && echo -e "\033[32mSkip $spath\033[0m"
-        return 0
+    # Warn: Source and target are same file
+    [ "$s_basename" = "$t_basename" ] && {
+        log_warn "Source and target are the same file" >&2
     }
+
+    # Generate cmd
+    cmd=$(eval echo $(echo "$COMMAND_PATTERN" \
+        | sed 's#\(%[0-9]*d\)#$(printf \1 $id)#g' \
+        | sed 's#{\(s\|source\)}#{s_path}#g' \
+        | sed 's#{\(t\|target\)}#{t_path}#g' \
+        | sed 's#{\([^{}]*\)}#\\"${\1}\\"#g' \
+    ))
 
     # Dry run
     [ -n "$DRY_RUN" ] && {
-        [ -n "$LOG2" ] && echo -e "\033[32mRename $info\033[0m"
+        log_info "\033[32m$cmd\033[0m"
         return 0
     }
 
     # Exec $cmd
-    cmd="mv \"$spath\" \"$tpath\""
-    mv "$spath" "$tpath" && {
-        [ -n "$LOG2" ] && echo -e "\033[32mRename $info\033[0m"
+    [ -n "$LOG2" ] && log_info "\033[32m+ $cmd\033[0m"
+    eval $cmd && {
         return 0
     } || {
-        [ -n "$LOG2" ] && echo -e "\033[31mError $info\033[0m"
+        log_error "$cmd"
         return 1
     }
 }
 
 # Process flags #
 TEMP=`getopt \
-    -o fm:eqvc:n: \
-    -l force,mode:,ext,quiet,verbose,command:,pattern: \
+    -o fe::qvc:n: \
+    -l force,ext::,quiet,verbose,command:,name: \
     -n "${0##*/}" \
     -- "$@"` || exit 1
 eval set -- "$TEMP"
@@ -93,34 +132,40 @@ while true
 do
     case "$1" in
         -f|--force) unset DRY_RUN; shift;;
-        -m|--mode) MODE=$2; shift 2;;
-        -e|--ext) IEXT=yes; shift;;
+        -e|--ext) IS_EXTRACT_EXT=yes; DEFAULT_EXT=$2; shift 2;;
         -q|--quiet) unset LOG1 LOG2; shift;;
         -v|--verbose) LOG1=yes; LOG2=yes; shift;;
-        -c|--command) COMMAND=$2; shift 2;;
-        -n|--pattern) PATTERN=$2; shift 2;;
+        -n|--name) NAME_PATTERN=$2; shift 2;;
+        -c|--command) COMMAND_PATTERN=$2; shift 2;;
         --) shift; break;;
         *) echo "Unkown argument: $1"; exit 1;;
     esac
 done
 
-[ -n "$DRY_RUN" ] && [ -n "$LOG2" ] && echo -e "\033[33mStarting a dry run without changes...\033[0m"
+[ -n "$DRY_RUN" ] && log_info "Starting a dry run without changes..."
 
-[ -n "$LOG1" ] && echo "MODE: $MODE"
+id=-1
+
+log_debug "DRY_RUN=$DRY_RUN"
+log_debug "TARGET_DIRNAME=$TARGET_DIRNAME"
+log_debug "IS_EXTRACT_EXT=$IS_EXTRACT_EXT"
+log_debug "DEFAULT_EXT=$DEFAULT_EXT"
+log_debug "COMMAND_PATTERN=$COMMAND_PATTERN"
+log_debug "NAME_PATTERN=$NAME_PATTERN"
 
 if [ -n "$*" ]; then
     #read arguments
     for arg in "$@"
     do
-        renameimage "$arg"
+        main "$arg"
     done
 else
     #interactive
     while read -e -p "> " input
     do
         history -s "$input"
-        renameimage "$input"
+        main "$input"
     done
 fi
 
-[ -n "$DRY_RUN" ] && [ -n "$LOG2" ] && echo -e "\033[33mNo changes to your files done, use -f to finally rename the files.\033[0m"
+[ -n "$DRY_RUN" ] && log_info "No changes to your files done, use -f to finally apply the changes."
