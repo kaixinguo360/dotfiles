@@ -11,7 +11,7 @@ IS_EXTRACT_EXT=
 DEFAULT_EXT=
 
 # Pattern String #
-NAME_PATTERN='new_$s_name'
+NAME_PATTERN='$s_name'
 COMMAND_PATTERN='mv \"$s_path\" \"$t_path\"'
 
 # -----------------------------
@@ -43,6 +43,7 @@ log_error() { [ -n "$LOG2" ] && printf "\033[31m[ERROR] $1\033[0m\n" >&2; }
 # Generate Target Name #
 gen_target_name() {
     t_basename=$(eval echo $(echo "$NAME_PATTERN" \
+        | sed 's#{\(url\|md5\|sha\)}#$(\1)#g' \
         | sed 's#\(%[0-9]*d\)#$(printf \1 $id)#g' \
         | sed 's#{}#{name}#g' \
         | sed 's#{\(full\|base\|dir\|ext\)}#{\1name}#g' \
@@ -93,12 +94,13 @@ main() {
     # ---- end ---- #
 
     # Warn: Source and target are same file
-    [ "$s_basename" = "$t_basename" ] && {
+    [ "$s_path" = "$t_path" ] && {
         log_warn "Source and target are the same file" >&2
     }
 
     # Generate cmd
     cmd=$(eval echo $(echo "$COMMAND_PATTERN" \
+        | sed 's#{\(url\|md5\|sha\)}#$(\1)#g' \
         | sed 's#\(%[0-9]*d\)#$(printf \1 $id)#g' \
         | sed 's#{\(s\|source\)}#{s_path}#g' \
         | sed 's#{\(t\|target\)}#{t_path}#g' \
