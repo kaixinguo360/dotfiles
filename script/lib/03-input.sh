@@ -16,7 +16,7 @@ read_input() {
         [ -z "$(eval echo \$$NAME)" ] && {
             [ -n "$IN_SCRIPT" ] && { [ -n "$DEFAULT" -a "$DEFAULT" != "-" ] \
                 && { eval "$NAME=\"$DEFAULT\""; echo -n '(default) '; }\
-                || { echo "$NAME not set"; err; };
+                || { echo "$NAME not set" >&2; exit 1; };
             } || {
                 echo ''
                 eval read_$TYPE $NAME \"$INFO\" \"$DEFAULT\"
