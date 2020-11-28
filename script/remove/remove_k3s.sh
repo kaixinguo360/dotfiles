@@ -18,7 +18,7 @@ not_has k3s && [ "$1" != "-f" ] && echo 'k3s removeed' && exit 0
 [ -x "/usr/local/bin/k3s-agent-uninstall.sh" ] \
     && sudo /usr/local/bin/k3s-agent-uninstall.sh
 
-# Add bash completion
+# Remove bash completion
 printf 'Removing bash_completion of kubectl... ' \
     && sudo rm -f /etc/bash_completion.d/kubectl \
     && printf 'done.\n'

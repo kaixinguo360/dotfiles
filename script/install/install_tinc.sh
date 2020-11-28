@@ -114,10 +114,14 @@ scp -q $NET_ROOT/hosts/$TINC_VHOST_NAME $TINC_SYNC_FROM:/etc/tinc/$TINC_VNET_NAM
     && echo 'done.' || exit 1
 }
 
-###############
-# Start tincd
-###############
-echo -n "Start tinc service... "
-$SUDO service tinc stop && $SUDO service tinc start \
-    && echo 'done.'
+# Add $TINC_VNET_NAME to config
+printf 'Enabling config... ' \
+    && sudo bash -ic "echo $TINC_VNET_NAME>/etc/tinc/nets.boot" \
+    && printf 'done.\n'
+
+# Expose ports
+expose_port 655/tcp
+
+# Start Service
+start_service tinc
 
