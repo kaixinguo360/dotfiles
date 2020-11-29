@@ -14,18 +14,24 @@ not_has k3s && [ "$1" != "-f" ] && echo 'k3s removeed' && exit 0
 
 # Remove k3s
 [ -x "/usr/local/bin/k3s-uninstall.sh" ] \
-    && sudo /usr/local/bin/k3s-uninstall.sh
+    && $sudo /usr/local/bin/k3s-uninstall.sh
 [ -x "/usr/local/bin/k3s-agent-uninstall.sh" ] \
-    && sudo /usr/local/bin/k3s-agent-uninstall.sh
+    && $sudo /usr/local/bin/k3s-agent-uninstall.sh
 
 # Remove bash completion
 printf 'Removing bash_completion of kubectl... ' \
-    && sudo rm -f /etc/bash_completion.d/kubectl \
+    && $sudo rm -f /etc/bash_completion.d/kubectl \
     && printf 'done.\n'
 printf 'Removing bash_completion of crictl... ' \
-    && sudo rm -f /etc/bash_completion.d/crictl \
+    && $sudo rm -f /etc/bash_completion.d/crictl \
     && printf 'done.\n'
 
+# Remove env and alias
+[ -n "$SUDO" ] && {
+printf 'Removing aliases and envs from bashrc.d... ' \
+    && rm -f $HOME/.local/bashrc.d/99-k3s.auto-generated.bashrc \
+    && printf 'done.\n'
+}
 # Close ports
 close_port 6443/tcp  # [agent] Kubernetes API
 close_port 8472/udp  # [server/agent] Required only for Flannel VXLAN

@@ -1,7 +1,7 @@
 # Get Environment Variable
 [ -n "$PREFIX" ] && IS_TERMUX='y'
 [ -n "$IS_TERMUX" ] && [ ! -f "$PREFIX/etc/apt/sources.list.d/pointless.list" ] && NEED_POINTLESS='y'
-[ -z "$IS_TERMUX" ] && [ ! "`id -u`" = "0" ] && { SUDO='sudo'; sudo='sudo'; }
+[ -z "$IS_TERMUX" ] && [ ! "`id -u`" = "0" ] && { SUDO='sudo -E'; sudo='sudo -E'; }
 [ -z "$IS_TERMUX" ] && [ -n "$(cat /proc/1/cgroup|grep docker)" ] && IS_DOCKER='y'
 
 # Get Package Manager

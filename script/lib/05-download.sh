@@ -24,7 +24,7 @@ download() {
 
 }
 
-# Usage: download_and_run REMOTE_SCRIPT SCRIPT_NAME
+# Usage: download_and_run REMOTE_SCRIPT SCRIPT_NAME [args...]
 # Example: download_and_run https://example.com/script.sh script.sh
 download_and_run() {
 
@@ -34,6 +34,7 @@ download_and_run() {
     # Get arguments
     local REMOTE_SCRIPT="$1"
     local SCRIPT_NAME="$2"
+    shift 2
 
     # Verify arguments
     [ -z "$REMOTE_SCRIPT" ] && return 1
@@ -47,7 +48,7 @@ download_and_run() {
         || { echo "Download remote script '${SCRIPT_NAME}' failed." >&2; return 1; }
 
     # Run
-    (cd; $SUDO bash "$LOCAL_SCRIPT")
+    (cd; $SUDO bash "$LOCAL_SCRIPT" "$@")
 
     # Return
     local RES=$?

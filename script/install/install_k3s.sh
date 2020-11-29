@@ -9,6 +9,7 @@ fi
 
 # Check Dependencies
 has k3s && [ "$1" != "-f" ] && echo 'k3s installed' && exit 0
+need docker.sh
 
 # Read Input
 read_input \
@@ -20,15 +21,31 @@ read_input \
 # Download && Run script.sh
 download_and_run \
     https://get.k3s.io \
-    get-k3s.sh
+    get-k3s.sh \
+    --docker
 
 # Add bash completion
 printf 'Adding bash_completion of kubectl... ' \
-    && sudo bash -ic 'kubectl completion bash 2>/dev/null >/etc/bash_completion.d/kubectl' \
+    && $sudo bash -ic 'kubectl completion bash 2>/dev/null >/etc/bash_completion.d/kubectl' \
     && printf 'done.\n'
 printf 'Adding bash_completion of crictl... ' \
-    && sudo bash -ic 'crictl completion bash 2>/dev/null >/etc/bash_completion.d/crictl' \
+    && $sudo bash -ic 'crictl completion bash 2>/dev/null >/etc/bash_completion.d/crictl' \
     && printf 'done.\n'
+
+# Add env
+printf 'Adding env to bashrc.d... ' \
+    && mkdir -p $HOME/.local/bashrc.d \
+    && echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> $HOME/.local/bashrc.d/99-k3s.auto-generated.bashrc \
+    && printf 'done.\n'
+
+# Add alias
+[ -n "$SUDO" ] && {
+printf 'Adding aliases to bashrc.d... ' \
+    && echo "alias kubectl='sudo -E kubectl'" >> $HOME/.local/bashrc.d/99-k3s.auto-generated.bashrc \
+    && echo "alias crictl='sudo -E crictl'" >> $HOME/.local/bashrc.d/99-k3s.auto-generated.bashrc \
+    && echo "alias ctr='sudo -E ctr'" >> $HOME/.local/bashrc.d/99-k3s.auto-generated.bashrc \
+    && printf 'done.\n'
+}
 
 # Expose ports
 expose_port 6443/tcp  # [agent] Kubernetes API
