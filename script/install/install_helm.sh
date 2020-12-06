@@ -39,5 +39,14 @@ printf 'Adding aliases to bashrc.d... ' \
     && printf 'done.\n'
 }
 
+# Print help
+printf "\n\033[33mInitialize a Helm Chart Repository\033[0m\n\n"
+printf "  $sudo helm repo add stable https://charts.helm.sh/stable\n"
+printf "  $sudo helm repo update\n"
+printf "\n\033[33mInstall an Example Chart\033[0m\n\n"
+printf "  $sudo helm install stable/mysql -g      \033[34m# Use generated name\033[0m\n"
+printf "  $sudo helm install <NAME> stable/mysql  \033[34m# Use custom name\033[0m\n"
+printf "\n"
+
 exit 0
 
