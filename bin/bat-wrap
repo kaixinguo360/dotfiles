@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# Static Param
+BAT_WRAP_LOCATION="${BAT_WRAP_LOCATION:-`pwd`}"
+
+# Input Arguments
+WSL_CMD="$1"
+BAT_CMD="${2:-$1}"
+
+# Print Help
+[ "$1" = "-h" -o "$1" = "--help" -o -z "$WSL_CMD" ] && {
+    cat << HERE
+Usage: `basename $0` WSL_CMD [BAT_CMD(default: =WSL_CMD)]
+
+Wrapping a WSL command as .bat script.
+Then, you can use them in powershell.exe or cmd.exe.
+
+Example:
+
+    # Print this help info
+    `basename $0` --help
+
+    # Wrap WSL command 'cat' to .bat script 'cat.bat'
+    `basename $0` cat
+
+    # Change the name of generated script (example: 'wsl_cat.bat')
+    `basename $0` cat wsl_cat
+
+    # By default, the script will be generated in the current working directory.
+    # Change this location by define the env 'BAT_WRAP_LOCATION' (example: '~/wsl-tools')
+    BAT_WRAP_LOCATION=~/wsl-tools `basename $0` cat
+
+    # Generated script will auto change all '\\' in args to '/', but keep '\\\\' as '\\'.
+    C:\> cat.bat ".\test\test.sh"  ==>  $ cat "./test/test.sh"
+    C:\> printf.bat "hello\\\\n"     ==>  $ printf "hello\n"
+
+HERE
+    exit 0
+}
+
+# Check $BAT_WRAP_LOCATION
+[ ! -d "$BAT_WRAP_LOCATION" ] && {
+    echo "[ERROR] \$BAT_WRAP_LOCATION(=$BAT_WRAP_LOCATION) is not a directory" >&2
+    exit 1
+}
+
+# Generate .bat script
+cat > "$BAT_WRAP_LOCATION/$BAT_CMD.bat" << HERE
+@echo off
+
+set params="%*"
+
+bash -ic "$WSL_CMD \$(echo '%params:"=%'|sed 's#\\\\\\\\#-dnwmv78uydgucasdbjhqeqefhiiv-#g'|sed 's#\\\\#/#g'|sed 's#-dnwmv78uydgucasdbjhqeqefhiiv-#\\\\#g')"
+
+HERE
+
+# Print result
+printf "$WSL_CMD\t==>\t$BAT_CMD.bat\n"
+
