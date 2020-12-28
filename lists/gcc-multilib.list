@@ -1,6 +1,7 @@
 make
-git
+tig
 @!apk:build-essential
 @!termux:gcc
-@!termux:g++
+@!termux:gcc-multilib
+@!termux:g++-multilib
 @termux:clang
