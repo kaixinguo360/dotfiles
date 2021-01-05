@@ -1,10 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
 # Default Params #
 LOG1=       # Log Leve 1
 LOG2=yes    # Log Leve 2
 DRY_RUN=yes
 TARGET_DIRNAME=
+NO_SKIP=
 
 # Extract Extension #
 IS_EXTRACT_EXT=
@@ -35,10 +36,11 @@ sha() { sha1sum "$s_path"|cut -d ' ' -f1; }
 md5() { md5sum "$s_path"|cut -d ' ' -f1; }
 
 # Log functions #
-log_debug() { [ -n "$LOG1" ] && printf "\033[34m[DEBUG] $1\033[0m\n" >&2; }
-log_info() { [ -n "$LOG2" ] && printf "[INFO] $1\n"; }
-log_warn() { [ -n "$LOG2" ] && printf "\033[33m[WARN] $1\033[0m\n" >&2; }
-log_error() { [ -n "$LOG2" ] && printf "\033[31m[ERROR] $1\033[0m\n" >&2; }
+log() { echo "$1"|sed 's/%/%%/g'|xargs -i printf {}; echo; }
+log_debug() { [ -n "$LOG1" ] && log "\033[34m[DEBUG] $1\033[0m" >&2; }
+log_info() { [ -n "$LOG2" ] && log "[INFO] $1"; }
+log_warn() { [ -n "$LOG2" ] && log "\033[33m[WARN] $1\033[0m" >&2; }
+log_error() { [ -n "$LOG2" ] && log "\033[31m[ERROR] $1\033[0m" >&2; }
 
 # Generate Target Name #
 gen_target_name() {
@@ -94,8 +96,9 @@ main() {
     # ---- end ---- #
 
     # Warn: Source and target are same file
-    [ "$s_path" = "$t_path" ] && {
-        log_warn "Source and target are the same file" >&2
+    [ "$s_path" = "$t_path" -a -z "$NO_SKIP" ] && {
+        log_warn "Skip no change file: $s_path" >&2
+        return 0
     }
 
     # Generate cmd
@@ -126,7 +129,7 @@ main() {
 # Process flags #
 TEMP=`getopt \
     -o fe::qvc:n: \
-    -l force,ext::,quiet,verbose,command:,name: \
+    -l force,ext::,quiet,verbose,command:,name:,no-skip \
     -n "${0##*/}" \
     -- "$@"` || exit 1
 eval set -- "$TEMP"
@@ -139,6 +142,7 @@ do
         -v|--verbose) LOG1=yes; LOG2=yes; shift;;
         -n|--name) NAME_PATTERN=$2; shift 2;;
         -c|--command) COMMAND_PATTERN=$2; shift 2;;
+        --no-skip) NO_SKIP=yes; shift;;
         --) shift; break;;
         *) echo "Unkown argument: $1"; exit 1;;
     esac
