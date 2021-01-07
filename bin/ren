@@ -46,7 +46,7 @@ log_error() { [ -n "$LOG2" ] && log "\033[31m[ERROR] $1\033[0m" >&2; }
 gen_target_name() {
     t_basename=$(eval echo $(echo "$NAME_PATTERN" \
         | sed 's#{\(url\|md5\|sha\)}#$(\1)#g' \
-        | sed 's#\(%[0-9]*d\)#$(printf \1 $id)#g' \
+        | sed 's#\(%[0-9]*d\)#$(printf \1 $index)#g' \
         | sed 's#{}#{name}#g' \
         | sed 's#{\(full\|base\|dir\|ext\)}#{\1name}#g' \
         | sed 's#{\([^{}]*\)}#${s_\1}#g' \
@@ -56,7 +56,7 @@ gen_target_name() {
 # Main #
 main() {
 
-    id=$((id+1))
+    index=$((index+1))
 
     [ -f "$1" ] || {
         log_error "Not a regular file: $1"
@@ -104,7 +104,7 @@ main() {
     # Generate cmd
     cmd=$(eval echo $(echo "$COMMAND_PATTERN" \
         | sed 's#{\(url\|md5\|sha\)}#$(\1)#g' \
-        | sed 's#\(%[0-9]*d\)#$(printf \1 $id)#g' \
+        | sed 's#\(%[0-9]*d\)#$(printf \1 $index)#g' \
         | sed 's#{\(s\|source\)}#{s_path}#g' \
         | sed 's#{\(t\|target\)}#{t_path}#g' \
         | sed 's#{\([^{}]*\)}#\\"${\1}\\"#g' \
@@ -128,8 +128,8 @@ main() {
 
 # Process flags #
 TEMP=`getopt \
-    -o fe::qvc:n: \
-    -l force,ext::,quiet,verbose,command:,name:,no-skip \
+    -o fe::qvc:n:i: \
+    -l force,ext::,quiet,verbose,command:,name:,no-skip,index: \
     -n "${0##*/}" \
     -- "$@"` || exit 1
 eval set -- "$TEMP"
@@ -143,6 +143,7 @@ do
         -n|--name) NAME_PATTERN=$2; shift 2;;
         -c|--command) COMMAND_PATTERN=$2; shift 2;;
         --no-skip) NO_SKIP=yes; shift;;
+        -i|--index) index=$2; shift 2;;
         --) shift; break;;
         *) echo "Unkown argument: $1"; exit 1;;
     esac
@@ -150,7 +151,8 @@ done
 
 [ -n "$DRY_RUN" ] && log_info "Starting a dry run without changes..."
 
-id=-1
+index=${index:-1}
+index=$((index-1))
 
 log_debug "DRY_RUN=$DRY_RUN"
 log_debug "TARGET_DIRNAME=$TARGET_DIRNAME"
