@@ -30,4 +30,4 @@ $sudo bash -c "echo '/swapfile swap swap defaults 0 0' >> /etc/fstab "
 
 # Print tips
 echo -e "Maybe you should reboot this machine, use this command:\n"
-echo "  shutdown -h now"
+echo -e "  $sudo reboot\n"
