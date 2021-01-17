@@ -13,7 +13,7 @@ build_local_docker_image() {
     ######################
 
     # Jump to root directory
-    cd $(dirname $(realpath $0))/../..
+    cd "$DOTFILE_HOME" || exit 1
 
     # Build Command
     local CMD="docker build . -f- -t "$TARGET_IMAGE" --no-cache"
@@ -27,7 +27,7 @@ WORKDIR /root
 
 COPY / /root/.dotfiles
 
-RUN .dotfiles/script/install.sh
+RUN .dotfiles/install.sh
 
 ENTRYPOINT [ "bash", "-ic" ]
 

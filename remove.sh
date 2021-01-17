@@ -13,14 +13,14 @@ fi
 [ -z "$*" ] && TOOLS="config.sh" || TOOLS="$@"
 
 # Load libs
-ROOT_PATH=.; for LIB in $ROOT_PATH/lib/??-*.sh; do . "$LIB"; done
+DOTFILE_HOME=.; for LIB in $DOTFILE_HOME/lib/??-*.sh; do . "$LIB"; done
 
 #has bash || { install_pkg bash; }
 
 # Install tools
 for TOOL in $TOOLS
 do
-    bin/tool-remove $INTERACTIVE $TOOL || {
+    sbin/tool-remove $INTERACTIVE $TOOL || {
         echo 'Batch remove stopped.'
         exit 1
     }

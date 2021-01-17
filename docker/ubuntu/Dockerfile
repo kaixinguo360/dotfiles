@@ -4,7 +4,7 @@ WORKDIR /root
 
 COPY / /root/.dotfiles
 
-RUN .dotfiles/script/install.sh
+RUN .dotfiles/install.sh
 
 ENTRYPOINT [ "bash", "-ic" ]
 

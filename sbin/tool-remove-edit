@@ -6,7 +6,7 @@
 # Show Help Info
 if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];then
     echo "Usage: ${0##*/} [-i] TOOL [OPTION]..."
-    echo "Quick edit install-tool"
+    echo "Quick edit remove-tool"
     exit 0
 fi
 
@@ -16,14 +16,14 @@ has nano && EDITOR="nano"
 has vi && EDITOR="vi"
 has vim && EDITOR="vim"
 
-# Pre Edit: Set Params
+# Pre Edit
 if [ "${TOOL##*.}" = "list" ];then
-    TOOL_PATH="$(realpath $ROOT_PATH/../lists/$TOOL)"
+    TOOL_PATH="$(realpath $DOTFILE_HOME/list/$TOOL)"
 else
     [ "${TOOL##*.}" = "sh" ] \
-        && TOOL=install_$TOOL \
-        || TOOL=install_$TOOL.sh
-    TOOL_PATH="$(realpath $ROOT_PATH/../script/install/$TOOL)"
+        && TOOL=remove_$TOOL \
+        || TOOL=remove_$TOOL.sh
+    TOOL_PATH="$(realpath $DOTFILE_HOME/script/$TOOL)"
 fi
 [ ! -f "$TOOL_PATH" ] && IS_NEW_TOOL=yes
 

@@ -24,7 +24,7 @@ Run below commands to install this dotfiles to your linux server.
 
 ```
 git clone git@github.com:kaixonguo360/dotfiles ~/.dotfiles \
-    && ~/.dotfiles/script/install.sh \
+    && ~/.dotfiles/install.sh \
     && source ~/.bashrc
 ```
 
@@ -41,10 +41,12 @@ This project should be located in ~/.dotfiles
 ├── bin     # Some useful mini bash tools
 ├── config  # Config files for bash/vim/...
 ├── docker  # Some useful Dockerfiles
-├── lists   # Some package lists
+├── lib     # Shared lib of bash scripts
+├── list    # Some package lists
+├── sbin    # Some management tools
 ├── script  # Some install/remove scripts
-├── snippets    # Some code snippets
-└── templates   # Some project templates
+├── snippet     # Some code snippets
+└── template    # Some project templates
 ```
 
 ## TODO

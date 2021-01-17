@@ -129,8 +129,8 @@ do
 done
 
 # Tool bashrc
-# include $ROOT/script/bin/*.bashrc
-source $(realpath $HOME/.bashrc.d)/../../../script/bin/*.bashrc
+# include $ROOT/sbin/*.bashrc
+source $(realpath $HOME/.bashrc.d)/../../../sbin/*.bashrc
 
 # Auto-generated bin
 # include ~/.local/bin to PATH
