@@ -3,8 +3,9 @@
 cd $(dirname $(realpath $0))
 
 # Remove Soft Link
-files='.bashrc .bashrc.d .profile'
+files='.bashrc .profile'
 for file in ${files[@]}
 do
     rm -f $HOME/$file
 done
+

@@ -29,6 +29,10 @@ find_resources() {
 
 # Usage: list_resource TYPE REGEX
 list_resource() {
+    if [ -z "$*" ]; then
+        echo "${DOTFILE_PATH:-${DOTFILE_HOME}}" | sed 's/:/\n/g'
+        return
+    fi
     local TYPE="$1"
     local REGEX="$2"
     echo "${DOTFILE_PATH:-${DOTFILE_HOME}}" \

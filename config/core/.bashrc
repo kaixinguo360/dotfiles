@@ -117,43 +117,45 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# Builtin bin
-# include $ROOT/bin to PATH
-PATH="$(realpath $HOME/.bashrc.d)/../../../bin:$PATH"
+# Set DOTFILE_HOME
+DOTFILE_HOME="$(realpath $(dirname $(realpath $HOME/.bashrc))/../..)"
+export DOTFILE_HOME
 
-# Builtin bashrc
-# include ~/.bashrc.d/*.bashrc
-for file in ~/.bashrc.d/*.bashrc;
+# Set DOTFILE_PATH
+if [ -d "$HOME/.dotdata" ];then
+    DOTFILE_PATH="$(realpath $HOME/.dotdata):$DOTFILE_HOME"
+else
+    DOTFILE_PATH="$DOTFILE_HOME"
+fi
+export DOTFILE_PATH
+
+# Builtin bin & bashrc
+PATH="$DOTFILE_HOME/sbin:$PATH"
+source $DOTFILE_HOME/sbin/*.bashrc
+
+# Custom bin
+for root in $(list-resource|tac);
 do
-    source "$file"
+    if [ -d "$root/bin" ]; then
+        PATH="$root/bin:$PATH"
+    fi
 done
 
-# Tool bashrc
-# include $ROOT/sbin/*.bashrc
-source $(realpath $HOME/.bashrc.d)/../../../sbin/*.bashrc
+# Custom bashrc
+for name in $(list-resource bashrc);
+do
+    for file in $(find-resources bashrc "$name");
+    do
+        source "$file"
+    done
+done
 
-# Auto-generated bin
-# include ~/.local/bin to PATH
+# Auto-generated bin & bashrc
 PATH="$HOME/.local/bin:$PATH"
-
-# Auto-generated bashrc
-# include ~/.local/bashrc.d/*.bashrc
 [ -n "$(ls ~/.local/bashrc.d/*.bashrc 2>/dev/null)" ] && {
-for file in ~/.local/bashrc.d/*.bashrc;
-do
-    source "$file"
-done
+    for file in ~/.local/bashrc.d/*.bashrc;
+    do
+        source "$file"
+    done
 }
 
-# User bin
-# include ~/.bin to PATH
-PATH="$HOME/.bin:$PATH"
-
-# User bashrc
-# include ~/.bin/local/*.bashrc
-[ -n "$(ls ~/.bin/local/*.bashrc 2>/dev/null)" ] && {
-for file in ~/.bin/local/*.bashrc;
-do
-    source "$file"
-done
-}

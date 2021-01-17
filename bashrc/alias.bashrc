@@ -11,7 +11,7 @@ alias ca='cacaview'
 alias untar='tar -zxpf'
 alias reloadbashrc='source ~/.bashrc'
 alias updot='upgradedotfile'
-alias upgradedotfile='(cd $HOME/.bashrc.d; \
+alias upgradedotfile='(cd "$DOTFILE_HOME"; \
     git fetch --all && \
     git reset --hard origin/master && \
     git pull) && \

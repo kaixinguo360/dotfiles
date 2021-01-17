@@ -1,7 +1,3 @@
-# Includ bin #
-
-PATH="$(realpath $HOME/.bashrc.d)/../../../sbin:$PATH"
-
 # Bash-Completion #
 
 complete -F _installable_tools tool-install
@@ -23,7 +19,6 @@ function _installable_tools() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    DOT_ROOT="$(realpath $HOME/.bashrc.d)/../../.."
     lists=$(list-resource list '*.list')
     scripts=$(list-resource script 'install_*.sh'|sed 's/^.*install_//'|sed '/tool.sh/d')
     opts="-i $lists $scripts"
@@ -40,7 +35,6 @@ function _removable_tools() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    DOT_ROOT="$(realpath $HOME/.bashrc.d)/../../.."
     lists=$(list-resource list '*.list')
     scripts=$(list-resource script 'remove_*.sh'|sed 's/^.*remove_//'|sed '/tool.sh/d')
     opts="-i $lists $scripts"
