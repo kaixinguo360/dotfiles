@@ -24,8 +24,8 @@ function _installable_tools() {
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     DOT_ROOT="$(realpath $HOME/.bashrc.d)/../../.."
-    lists=$(ls "$DOT_ROOT/list")
-    scripts=$(ls "$DOT_ROOT"/script/install_*.sh|sed 's/^.*install_//'|sed '/tool.sh/d')
+    lists=$(list-resource list '*.list')
+    scripts=$(list-resource script 'install_*.sh'|sed 's/^.*install_//'|sed '/tool.sh/d')
     opts="-i $lists $scripts"
 
     if [[ ${cur} == * ]] ; then
@@ -41,8 +41,8 @@ function _removable_tools() {
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     DOT_ROOT="$(realpath $HOME/.bashrc.d)/../../.."
-    lists=$(ls "$DOT_ROOT/list")
-    scripts=$(ls "$DOT_ROOT"/script/remove_*.sh|sed 's/^.*remove_//'|sed '/tool.sh/d')
+    lists=$(list-resource list '*.list')
+    scripts=$(list-resource script 'remove_*.sh'|sed 's/^.*remove_//'|sed '/tool.sh/d')
     opts="-i $lists $scripts"
 
     if [[ ${cur} == * ]] ; then

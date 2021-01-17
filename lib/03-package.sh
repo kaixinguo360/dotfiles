@@ -56,7 +56,7 @@ install_list() {
 }
 
 install_script() {
-    CMD_PATH="$DOTFILE_HOME/script/install_$1"
+    CMD_PATH="$(find_resource script "install_$1")"
     [ -f "$CMD_PATH" ] || { echo "No such script '$1'" >&2; return 1; }
     shift
     $CMD_PATH $@
@@ -130,7 +130,7 @@ remove_list() {
 }
 
 remove_script() {
-    CMD_PATH="$DOTFILE_HOME/script/remove_$1"
+    CMD_PATH="$(find_resource script "remove_$1")"
     [ -f "$CMD_PATH" ] || { echo "No such script '$1'" >&2; return 1; }
     shift
     $CMD_PATH $@

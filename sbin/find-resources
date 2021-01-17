@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Load libs
+. $(dirname $(realpath $0))/lib.sh
+
+# Show Help Info
+if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];then
+    echo "Usage: ${0##*/} TYPE NAME"
+    echo "Find resources"
+    exit 0
+fi
+
+# Find resources
+find_resources $@
+

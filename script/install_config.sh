@@ -1,8 +1,7 @@
 #!/bin/bash
 . $(dirname $(realpath $0))/lib.sh
 
-cd $DOTFILE_HOME/config
-configs=$(ls)
+configs=$(list_resource config)
 
 # Show Help Info
 if [[ $1 = "-h" || $1 = "--help" ]];then
@@ -12,27 +11,29 @@ fi
 
 # Install Config
 install_config() {
-    files=$(ls -A $1)
+    local root="$1"
+    local files=$(ls -A "$root")
     for file in ${files[@]}
     do
         rm -f $HOME/$file
-        ln -s $(realpath $dir/$file) $HOME
+        ln -s $(realpath $root/$file) $HOME
     done
     #stow $1 -t $HOME
 }
 
 # Install
-for dir in ${configs[@]};
+for config in ${configs[@]};
 do
-    echo -n "Installing config of '$dir'... "
-    CUSTOM="$dir/install.sh"
+    echo -n "Installing config of '$config'... "
+    config_root=$(find_resource config "$config")
+    CUSTOM="$config_root/install.sh"
     if [ -f "$CUSTOM" ];then
         [ ! -x "$CUSTOM" ] && { echo "Permission denied, can't execute $CUSTOM"; exit 1; }
         $CUSTOM
     else
-        install_config $dir
+        install_config $config_root
     fi
-    [ "$?" != "0" ] && { echo "An error occured while installing config files of '$dir', installation stopped."; exit 1; }
+    [ "$?" != "0" ] && { echo "An error occured while installing config files of '$config', installation stopped."; exit 1; }
     echo 'done.'
 done
 
