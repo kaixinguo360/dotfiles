@@ -142,20 +142,17 @@ PATH="$DOTFILE_HOME/sbin:$PATH"
 source $DOTFILE_HOME/sbin/*.bashrc
 
 # Custom bin
-for root in $(list-resource|tac);
+for profile in $(find-resource --reverse);
 do
-    if [ -d "$root/bin" ]; then
-        PATH="$root/bin:$PATH"
+    if [ -d "$profile/bin" ]; then
+        PATH="$profile/bin:$PATH"
     fi
 done
 
 # Custom bashrc
-for name in $(list-resource bashrc);
+for bashrc in $(find-resource --path --all --reverse --no-sort bashrc);
 do
-    for file in $(find-resources bashrc "$name");
-    do
-        source "$file"
-    done
+    source "$bashrc"
 done
 
 # Auto-generated bin & bashrc

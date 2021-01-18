@@ -1,49 +1,63 @@
-# Usage: find_resource TYPE NAME
+# Usage: find_resource [-p|--path] [-a|--all] [-r|--reverse] [-n|--no-sort] TYPE [REGEX]
 find_resource() {
-    local TYPE="$1"
-    local NAME="$2"
-    echo "${DOTFILE_PATH:-${DOTFILE_HOME}}" \
-        | sed 's/:/\n/g' \
-        | xargs -i find {} \
-            -maxdepth 2 \
-            -mindepth 2 \
-            -path "*/$TYPE/$NAME" \
-            2>/dev/null \
-        | head -n1 \
-        | xargs -i realpath {}
-}
 
-# Usage: find_resources TYPE NAME
-find_resources() {
-    local TYPE="$1"
-    local NAME="$2"
-    echo "${DOTFILE_PATH:-${DOTFILE_HOME}}" \
-        | sed 's/:/\n/g' \
-        | xargs -i find {} \
-            -maxdepth 2 \
-            -mindepth 2 \
-            -path "*/$TYPE/$NAME" \
-            2>/dev/null \
-        | xargs -i realpath {}
-}
+    # args
+    for arg in "$@"
+    do
+        case $arg in
+            -p|--path) local FLAG_PATH=yes; shift;;
+            -a|--all) local FLAG_ALL=yes; shift;;
+            -r|--reverse) local FLAG_REVERSE=yes; shift;;
+            -n|--no-sort) local FLAG_NO_SORT=yes; shift;;
+            *) break;;
+        esac
+    done
 
-# Usage: list_resource TYPE REGEX
-list_resource() {
+    # main
     if [ -z "$*" ]; then
-        echo "${DOTFILE_PATH:-${DOTFILE_HOME}}" | sed 's/:/\n/g'
+        echo "${DOTFILE_PATH:-${DOTFILE_HOME}}" \
+            | sed 's/:/\n/g' \
+            | {
+                # Reverse
+                [ -z "$FLAG_REVERSE" ] && cat && return
+                tac
+              }
         return
     fi
     local TYPE="$1"
     local REGEX="$2"
     echo "${DOTFILE_PATH:-${DOTFILE_HOME}}" \
         | sed 's/:/\n/g' \
-        | xargs -i find {} \
+        | xargs -i find -L \
+            {} \
             -maxdepth 2 \
             -mindepth 2 \
             -path "*/$TYPE/$([ -n "$REGEX" ] && echo "$REGEX" || echo "[^.]*")" \
             2>/dev/null \
-        | xargs -i basename {} \
-        | sort \
-        | uniq
+        | {
+            # Drop Repeated Resource
+            [ -n "$FLAG_ALL" ] && cat && return
+            local names=
+            while read input
+            do
+                local name=${input##*/}
+                [ -n "$(echo "$names"|grep "$name")" ] && continue
+                local names="$names <$name>"
+                echo "$input"
+            done
+          } \
+        | {
+            # Sort By Resource Name
+            [ -n "$FLAG_NO_SORT" ] && cat && return
+            sed 's#\(.*\)/\([^/]*\)#\2 \1/\2#' \
+              | sort -k 1 \
+              | sed 's#^[^/]* ##g'
+          } \
+        | {
+            # Reverse
+            [ -z "$FLAG_REVERSE" ] && cat && return
+            tac
+          } \
+        | xargs -i $([ -n "$FLAG_PATH" ] && echo "realpath" || echo "basename") {}
 }
 
