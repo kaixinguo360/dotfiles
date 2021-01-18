@@ -117,16 +117,24 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# Set DOTFILE_HOME
+# Set default DOTFILE_HOME
 DOTFILE_HOME="$(realpath $(dirname $(realpath $HOME/.bashrc))/../..)"
-export DOTFILE_HOME
 
-# Set DOTFILE_PATH
+# Add default DOTFILE_PATH: ~/.dotdata
+# You can change this default value by add your own config in ~/.dotconfig
 if [ -d "$HOME/.dotdata" ];then
     DOTFILE_PATH="$(realpath $HOME/.dotdata):$DOTFILE_HOME"
 else
     DOTFILE_PATH="$DOTFILE_HOME"
 fi
+
+# Load custom config: ~/.dotconfig
+if [ -f "$HOME/.dotconfig" ];then
+    source $HOME/.dotconfig
+fi
+
+# Export global enviroment variable
+export DOTFILE_HOME
 export DOTFILE_PATH
 
 # Builtin bin & bashrc
