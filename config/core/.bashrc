@@ -122,20 +122,24 @@ DOTFILE_HOME="$(realpath $(dirname $(realpath $HOME/.bashrc))/../..)"
 
 # Add default DOTFILE_PATH: ~/.dotdata
 # You can change this default value by add your own config in ~/.dotconfig
-if [ -d "$HOME/.dotdata" ];then
-    DOTFILE_PATH="$(realpath $HOME/.dotdata):$DOTFILE_HOME"
-else
-    DOTFILE_PATH="$DOTFILE_HOME"
+if [ -z "$DOTFILE_PATH" ]; then
+    if [ -d "$HOME/.dotdata" ];then
+        DOTFILE_PATH="$(realpath $HOME/.dotdata):$DOTFILE_HOME"
+    else
+        DOTFILE_PATH="$DOTFILE_HOME"
+    fi
 fi
 
-# Load custom config: ~/.dotconfig
-if [ -f "$HOME/.dotconfig" ];then
-    source $HOME/.dotconfig
+# Load custom config
+DOTFILE_CONFIG=${DOTFILE_CONFIG:-$HOME/.dotconfig}
+if [ -f "$DOTFILE_CONFIG" ];then
+    . "$DOTFILE_CONFIG"
 fi
 
 # Export global enviroment variable
 export DOTFILE_HOME
 export DOTFILE_PATH
+export DOTFILE_CONFIG
 
 # Builtin bin & bashrc
 PATH="$DOTFILE_HOME/sbin:$PATH"

@@ -1,7 +1,5 @@
 #!/bin/sh
 
-cd $(dirname $(realpath $0))
-
 # Show help info
 if [ "$1" = "-h" -o "$1" = "--help" ];then
     echo "$0 [-i] TOOL..."
@@ -10,7 +8,14 @@ if [ "$1" = "-h" -o "$1" = "--help" ];then
 fi
 
 # Load libs
-DOTFILE_HOME=.; for LIB in $DOTFILE_HOME/lib/??-*.sh; do . "$LIB"; done
+DOTFILE_HOME="$(dirname $(realpath $0))"
+for LIB in $DOTFILE_HOME/lib/??-*.sh
+do
+    . "$LIB"
+done
+
+# Change Work Directory
+cd "$DOTFILE_HOME"
 
 # Read command line arguments
 [ "$1" = "-i" ] && { INTERACTIVE='-i'; shift; } || { INTERACTIVE=''; }
