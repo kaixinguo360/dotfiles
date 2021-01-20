@@ -15,8 +15,9 @@ install_config() {
     local files=$(ls -A "$root")
     for file in ${files[@]}
     do
-        rm -f $HOME/$file
-        ln -s $(realpath $root/$file) $HOME
+        rm -rf "$HOME/$file.bak" >/dev/null 2>&1
+        mv -fT "$HOME/$file" "$HOME/$file.bak" >/dev/null 2>&1
+        ln -s "$(realpath $root/$file)" "$HOME"
     done
     #stow $1 -t $HOME
 }
