@@ -1,6 +1,6 @@
 # Get Content From List
 list() {
-    LIST_PATH="$(find_resource --path list "$1")"
+    LIST_PATH="$(find_resource "list/$1")"
     [ ! -f "$LIST_PATH" ] && return 1
     cat "$LIST_PATH" \
         |sed 's/^\([^#]*\s\+\|\)#.*$/\1/'|sed ':a;N;s/\\\s*\n//g;$!ba'

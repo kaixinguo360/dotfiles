@@ -19,8 +19,8 @@ function _installable_tools() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    lists=$(find-resource list '*.list')
-    scripts=$(find-resource script 'install_*.sh'|sed 's/^.*install_//'|sed '/tool.sh/d')
+    lists=$(find-resource --name 'list/*.list')
+    scripts=$(find-resource --name 'script/install_*.sh'|sed 's/^.*install_//'|sed '/tool.sh/d')
     opts="-i $lists $scripts"
 
     if [[ ${cur} == * ]] ; then
@@ -35,8 +35,8 @@ function _removable_tools() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    lists=$(find-resource list '*.list')
-    scripts=$(find-resource script 'remove_*.sh'|sed 's/^.*remove_//'|sed '/tool.sh/d')
+    lists=$(find-resource --name 'list/*.list')
+    scripts=$(find-resource --name 'script/remove_*.sh'|sed 's/^.*remove_//'|sed '/tool.sh/d')
     opts="-i $lists $scripts"
 
     if [[ ${cur} == * ]] ; then

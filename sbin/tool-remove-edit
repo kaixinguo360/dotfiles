@@ -18,13 +18,13 @@ has vim && EDITOR="vim"
 
 # Pre Edit
 if [ "${TOOL##*.}" = "list" ];then
-    TOOL_PATH="$(find_resource --path list $TOOL)"
+    TOOL_PATH="$(find_resource list/$TOOL)"
     TOOL_PATH="${TOOL_PATH:-$(realpath $DOTFILE_HOME/list/$TOOL)}"
 else
     [ "${TOOL##*.}" = "sh" ] \
         && TOOL=remove_$TOOL \
         || TOOL=remove_$TOOL.sh
-    TOOL_PATH="$(find_resource --path script $TOOL)"
+    TOOL_PATH="$(find_resource script/$TOOL)"
     TOOL_PATH="${TOOL_PATH:-$(realpath $DOTFILE_HOME/script/$TOOL)}"
 fi
 [ ! -f "$TOOL_PATH" ] && IS_NEW_TOOL=yes

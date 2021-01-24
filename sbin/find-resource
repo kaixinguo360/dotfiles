@@ -5,7 +5,7 @@
 
 # Show Help Info
 if [ "$1" = "-h" ] || [ "$1" = "--help" ];then
-    echo "Usage: ${0##*/} [-p|--path] [-a|--all] [-r|--reverse] [-n|--no-sort] TYPE [REGEX]"
+    echo "Usage: ${0##*/} [-n|--name] [-a|--all] [-r|--reverse] [-o|--original] REGEX"
     echo "Find resource"
     exit 0
 fi

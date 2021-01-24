@@ -154,7 +154,7 @@ do
 done
 
 # Custom bashrc
-for bashrc in $(find-resource --path --all --reverse --no-sort bashrc);
+for bashrc in $(find-resource --all --reverse --original 'bashrc/*.bashrc');
 do
     source "$bashrc"
 done

@@ -19,17 +19,17 @@ export DOTFILE_HOME
 export DOTFILE_PATH
 export DOTFILE_CONFIG
 
-# Usage: find_resource [-p|--path] [-a|--all] [-r|--reverse] [-n|--no-sort] TYPE [REGEX]
+# Usage: find_resource [-n|--name] [-a|--all] [-r|--reverse] [-o|--original] REGEX
 find_resource() {
 
     # args
     for arg in "$@"
     do
         case $arg in
-            -p|--path) local FLAG_PATH=yes; shift;;
+            -n|--name) local FLAG_NAME=yes; shift;;
             -a|--all) local FLAG_ALL=yes; shift;;
             -r|--reverse) local FLAG_REVERSE=yes; shift;;
-            -n|--no-sort) local FLAG_NO_SORT=yes; shift;;
+            -o|--original) local FLAG_ORIGINAL=yes; shift;;
             *) break;;
         esac
     done
@@ -45,15 +45,14 @@ find_resource() {
               }
         return
     fi
-    local TYPE="$1"
-    local REGEX="$2"
+    local REGEX="$1"
     echo "${DOTFILE_PATH:-${DOTFILE_HOME}}" \
         | sed 's/:/\n/g' \
         | xargs -i find -L \
             {} \
             -maxdepth 2 \
             -mindepth 2 \
-            -path "*/$TYPE/$([ -n "$REGEX" ] && echo "$REGEX" || echo "[^.]*")" \
+            -path "*/$REGEX" \
             2>/dev/null \
         | {
             # Drop Repeated Resource
@@ -69,7 +68,7 @@ find_resource() {
           } \
         | {
             # Sort By Resource Name
-            [ -n "$FLAG_NO_SORT" ] && cat && return
+            [ -n "$FLAG_ORIGINAL" ] && cat && return
             sed 's#\(.*\)/\([^/]*\)#\2 \1/\2#' \
               | sort -k 1 \
               | sed 's#^[^/]* ##g'
@@ -79,6 +78,6 @@ find_resource() {
             [ -z "$FLAG_REVERSE" ] && cat && return
             tac
           } \
-        | xargs -i $([ -n "$FLAG_PATH" ] && echo "realpath" || echo "basename") {}
+        | xargs -i $([ -n "$FLAG_NAME" ] && echo "basename" || echo "realpath") {}
 }
 
