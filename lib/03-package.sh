@@ -16,6 +16,7 @@ install_pkg() {
         [ -z "$IS_UPDATED" ] && { 
             echo -n " - updating... " \
                 && $SUDO apt-get update -q \
+                    | spinner \
                     > $TMP_PATH/install_pkg.log \
                 && rm $TMP_PATH/install_pkg.log \
                 && export IS_UPDATED='y' \
@@ -25,8 +26,10 @@ install_pkg() {
             && DEBIAN_FRONTEND=noninteractive $SUDO apt-get install \
                 -o Dpkg::Options::="--force-confdef" \
                 -o Dpkg::Options::="--force-confold" \
+                -o Dpkg::Use-Pty=0 \
                 --no-install-recommends \
                 -y -q $@ \
+                | spinner \
                 > $TMP_PATH/install_pkg.log \
             && rm $TMP_PATH/install_pkg.log \
             && echo "done."
@@ -35,6 +38,7 @@ install_pkg() {
     [ "$PMG" = "apk" ] && {
         echo -n " - installing... " \
             && $SUDO apk add --no-cache $@ \
+                | spinner \
                 > $TMP_PATH/install_pkg.log \
             && rm $TMP_PATH/install_pkg.log \
             && echo "done."
@@ -99,8 +103,10 @@ remove_pkg() {
             && DEBIAN_FRONTEND=noninteractive $SUDO apt-get purge \
                 -o Dpkg::Options::="--force-confdef" \
                 -o Dpkg::Options::="--force-confold" \
+                -o Dpkg::Use-Pty=0 \
                 --auto-remove \
                 -y -q $@ \
+                | spinner \
                 > $TMP_PATH/remove_pkg.log \
             && rm $TMP_PATH/remove_pkg.log \
             && echo done.
@@ -109,6 +115,7 @@ remove_pkg() {
     [ "$PMG" = "apk" ] && {
         echo -n " - removing... " \
             && SUDO apk del --no-cache $@ \
+                | spinner \
                 > $TMP_PATH/remove_pkg.log \
             && rm $TMP_PATH/remove_pkg.log \
             && echo done.
@@ -168,6 +175,37 @@ need() {
             && continue;
         install_tool $TOOL || { echo "Dependent tool '$TOOL' installation failed" >&2; exit 1; }
     done
+}
+
+# Output beautify tool
+spinner() {
+    printf '[-] ' >&2
+
+    while read line
+    do
+        printf '%s\n' "$line"
+
+        for i in `seq 0 ${length:-0}`; do
+            printf '\b \b' >&2
+        done
+        length=${#line}
+
+        case ${index:-0} in
+            0) printf '\b\b\b[\\]' >&2;;
+            1) printf '\b\b\b[|]' >&2;;
+            2) printf '\b\b\b[/]' >&2;;
+            3) printf '\b\b\b[-]' >&2;;
+        esac
+        index=$(( ( ${index:-0} + 1 ) % 4 ))
+
+        printf ' %s' "$line" >&2
+    done
+
+    for i in `seq 0 ${length:-0}`; do
+        printf '\b \b' >&2
+    done
+
+    printf '\b\b\b   \b\b\b' >&2
 }
 
 ###########
