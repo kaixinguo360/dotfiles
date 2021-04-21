@@ -120,33 +120,15 @@ fi
 # Set default DOTFILE_HOME
 DOTFILE_HOME="$(realpath $(dirname $(realpath $HOME/.bashrc))/../..)"
 
-# Add default DOTFILE_PATH: ~/.dotdata
-# You can change this default value by add your own config in ~/.dotconfig
-if [ -z "$DOTFILE_PATH" ]; then
-    if [ -d "$HOME/.dotdata" ];then
-        DOTFILE_PATH="$(realpath $HOME/.dotdata):$DOTFILE_HOME"
-    else
-        DOTFILE_PATH="$DOTFILE_HOME"
-    fi
-fi
-
-# Load custom config
-DOTFILE_CONFIG=${DOTFILE_CONFIG:-$HOME/.dotconfig}
-if [ -f "$DOTFILE_CONFIG" ];then
-    . "$DOTFILE_CONFIG"
-fi
-
-# Export global enviroment variable
-export DOTFILE_HOME
-export DOTFILE_PATH
-export DOTFILE_CONFIG
+# Load lib: find_resource
+source $(dirname $(realpath $HOME/.bashrc))/../../lib/01-resource.sh
 
 # Builtin bin & bashrc
 PATH="$DOTFILE_HOME/sbin:$PATH"
 source $DOTFILE_HOME/sbin/*.bashrc
 
 # Custom bin
-for profile in $(find-resource --reverse);
+for profile in $(find_resource --reverse);
 do
     if [ -d "$profile/bin" ]; then
         PATH="$profile/bin:$PATH"
@@ -154,7 +136,7 @@ do
 done
 
 # Custom bashrc
-for bashrc in $(find-resource --all --reverse --original 'bashrc/*.bashrc');
+for bashrc in $(find_resource --all --reverse --original 'bashrc/*.bashrc');
 do
     source "$bashrc"
 done

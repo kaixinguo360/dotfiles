@@ -47,13 +47,9 @@ find_resource() {
     fi
     local REGEX="$1"
     echo "${DOTFILE_PATH:-${DOTFILE_HOME}}" \
-        | sed 's/:/\n/g' \
-        | xargs -i find -L \
-            {} \
-            -maxdepth 2 \
-            -mindepth 2 \
-            -path "*/$REGEX" \
-            2>/dev/null \
+        | sed -e 's/:/" "/g' \
+              -e 's#.*#find -L "\0" -maxdepth 2 -mindepth 2 -path "*/'"$REGEX"'"#g' \
+        | sh 2>/dev/null \
         | {
             # Drop Repeated Resource
             [ -n "$FLAG_ALL" ] && cat && return
@@ -78,6 +74,6 @@ find_resource() {
             [ -z "$FLAG_REVERSE" ] && cat && return
             tac
           } \
-        | xargs -i $([ -n "$FLAG_NAME" ] && echo "basename" || echo "realpath") {}
+        | { if [ -n "$FLAG_NAME" ]; then sed 's#.*/##g'; else xargs realpath 2>/dev/null; fi; }
 }
 
