@@ -136,7 +136,7 @@ do
 done
 
 # Custom bashrc
-for bashrc in $(find_resource --all --reverse --original 'bashrc/*.bashrc');
+for bashrc in $(find_resource --all 'bashrc/*.bashrc');
 do
     source "$bashrc"
 done

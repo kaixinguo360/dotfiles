@@ -1,7 +1,7 @@
 # Set Proxy
-function setproxy() {
-    [[ "$1" = "-h" || "$1" = "--help" ]] && { type setproxy; return; }
-    [[ "$1" = "-" || "$1" = "--" ]] && { clearproxy; return; }
+setproxy() {
+    [ "$1" = "-h" -o "$1" = "--help" ] && { type setproxy; return; }
+    [ "$1" = "-" -o "$1" = "--" ] && { clearproxy; return; }
     if [ "$1" = "" ];then
         PROXY=$PRESET_PROXY
     else
@@ -38,8 +38,8 @@ HERE"
 alias proxy=setproxy
 
 # Clear Proxy
-function clearproxy() {
-    [[ "$1" = "-h" || "$1" = "--help" ]] && { type clearproxy; return; }
+clearproxy() {
+    [ "$1" = "-h" -o "$1" = "--help" ] && { type clearproxy; return; }
     unset PROXY
     unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY ftp_proxy FTP_PROXY default_proxy DEFAULT_PROXY
     (command -v git>/dev/null 2>&1) && \
@@ -53,7 +53,7 @@ function clearproxy() {
 alias noproxy=clearproxy
 
 # Proxy Status
-function proxystatus() {
+proxystatus() {
     echo \# ENV
     echo PROXY=$PROXY
     echo http_proxy=$http_proxy
@@ -80,7 +80,7 @@ function proxystatus() {
 }
 
 # Start SSR
-function ssr() {
+ssr() {
     if [ "$SSR" != "" ];then
         setproxy
         $SSR $@ &
@@ -91,7 +91,7 @@ function ssr() {
 }
 
 # Stop SSR
-function ssrt() {
+ssrt() {
     if [ "$SSR" != "" ];then
         noproxy
         kall $(ps -eo pid,cmd|grep -v grep|grep "$SSR"|awk '{print $1}')
@@ -102,7 +102,7 @@ function ssrt() {
 }
 
 # Test SSR
-function ssrtest() {
+ssrtest() {
     if [ "$SSR" != "" ];then
         setproxy
         ($SSR $@ &)

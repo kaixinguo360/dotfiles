@@ -1,7 +1,7 @@
 CURL_TIMROUT=3
 CURL_CMD="curl -s --connect-timeout $CURL_TIMROUT"
 
-function ip_check() {
+ip_check() {
     read IP
     if [ -z "$IP" ];then
         [ -n "$1" ] && echo "$1" >&2

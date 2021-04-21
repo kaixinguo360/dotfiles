@@ -1,7 +1,7 @@
 # Make Alias
 [ -n "$(command -v make)" ] && {
 
-function mmake() {
+mmake() {
     current=$(realpath $(pwd))
     while [ true ]
     do
