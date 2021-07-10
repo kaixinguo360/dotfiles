@@ -129,16 +129,23 @@ endif
 
 
 """"""""""""""""""""""""""""""""""""""""
+"      Save Last Position
+""""""""""""""""""""""""""""""""""""""""
+if has("autocmd")
+    au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+endif
+
+""""""""""""""""""""""""""""""""""""""""
 "      Indent
 """"""""""""""""""""""""""""""""""""""""
 autocmd FileType php,python,c,java,perl,shell,bash,vim,ruby,cpp set ai
 autocmd FileType php,python,c,java,perl,shell,bash,vim,ruby,cpp set sw=4
 autocmd FileType php,python,c,java,perl,shell,bash,vim,ruby,cpp set ts=4
 autocmd FileType php,python,c,java,perl,shell,bash,vim,ruby,cpp set sts=4
-autocmd FileType javascript,html,css,xml set ai
-autocmd FileType javascript,html,css,xml set sw=2
-autocmd FileType javascript,html,css,xml set ts=2
-autocmd FileType javascript,html,css,xml set sts=2
+autocmd FileType javascript,html,css,xml,yaml set ai
+autocmd FileType javascript,html,css,xml,yaml set sw=2
+autocmd FileType javascript,html,css,xml,yaml set ts=2
+autocmd FileType javascript,html,css,xml,yaml set sts=2
 
 
 """"""""""""""""""""""""""""""""""""""""
@@ -155,4 +162,5 @@ set expandtab
 set pastetoggle=<F2>
 
 set incsearch
+set hlsearch
 
