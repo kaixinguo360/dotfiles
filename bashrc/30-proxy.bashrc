@@ -17,6 +17,8 @@ setproxy() {
     export HTTPS_PROXY=$PROXY
     export ftp_proxy=$PROXY
     export FTP_PROXY=$PROXY
+    export rsync_proxy=$PROXY
+    export RSYNC_PROXY=$PROXY
     export default_proxy=$PROXY
     export DEFAULT_PROXY=$PROXY
     (command -v git>/dev/null 2>&1) && {
@@ -41,7 +43,7 @@ alias proxy=setproxy
 clearproxy() {
     [ "$1" = "-h" -o "$1" = "--help" ] && { type clearproxy; return; }
     unset PROXY
-    unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY ftp_proxy FTP_PROXY default_proxy DEFAULT_PROXY
+    unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY ftp_proxy FTP_PROXY rsync_proxy RSYNC_PROXY default_proxy DEFAULT_PROXY
     (command -v git>/dev/null 2>&1) && \
         git config --global --unset http.proxy && \
         git config --global --unset https.proxy
@@ -62,6 +64,8 @@ proxystatus() {
     echo HTTPS_PROXY=$HTTPS_PROXY
     echo ftp_proxy=$ftp_proxy
     echo FTP_PROXY=$FTP_PROXY
+    echo rsync_proxy=$rsync_proxy
+    echo RSYNC_PROXY=$RSYNC_PROXY
     echo default_proxy=$default_proxy
     echo DEFAULT_PROXY=$DEFAULT_PROXY
     (command -v git>/dev/null 2>&1) && {
