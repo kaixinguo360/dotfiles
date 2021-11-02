@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Help #
+
+if [ "$1" = "-h" -o "$1" = "--help" -o -z "$2" ]; then
+    printf 'Usage: %s FILE LINE [COLUMN]\n' "$(basename $0)"
+    printf 'Extract data from csv file\n'
+    exit 0
+fi
+
+# Utils #
+
+error() {
+    printf "[ERROR] " >&2
+    printf "$@" >&2
+    exit 1
+}
+
+# Params #
+
+DELIMITER="${DELIMITER:-\\t}"
+FILE="$1"
+LINE_INDEX="$2"
+COLUMN_NAME="$3"
+
+# Main #
+
+[ ! -e "$FILE" ] \
+    && error 'not a regular file: %s\n' "$FILE"
+[ -z "$(printf '%s\n' "$LINE_INDEX" | sed -n '/^[0-9][0-9]*$/p')" ] \
+    && error 'not a number: %s\n' "$LINE_INDEX"
+
+if [ -z "$COLUMN_NAME" -o "$COLUMN_NAME" = '*' -o "$COLUMN_NAME" = ':*' ]; then
+    cat "$FILE" | sed -n "$(($LINE_INDEX+1))"'p'
+else
+    if [ "$(printf '%s\n' "$COLUMN_NAME" | grep -o '^.')" != ':' ]; then
+        COLUMN_INDEX="$(head -n1 "$FILE" | sed 's/'"$DELIMITER"'/\n/g' | grep -in "^${COLUMN_NAME}\$" | sed 's/:.*$//g')"
+        [ -z "$COLUMN_INDEX" ] \
+            && error 'no such column: %s\n' "$COLUMN_NAME"
+    else
+        COLUMN_INDEX="$(printf '%s\n' "$COLUMN_NAME" | sed -E 's/^.(.*)$/\1/g')"
+        [ -z "$(printf '%s\n' "$COLUMN_INDEX" | sed -n '/^[0-9][0-9]*$/p')" ] \
+            && error 'not a number: %s\n' "$COLUMN_INDEX"
+    fi
+
+    cat "$FILE" \
+        | sed -n "$(($LINE_INDEX+1))"'p' \
+        | sed 's/'"$DELIMITER"'/\n/g' \
+        | sed -n "$COLUMN_INDEX"'p'
+fi
+
