@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# Params
+cmd_template="${@:-$UPPDOT_DEFAULT_CMD}"
+remotes="$UPPDOT_REMOTES"
+tmpdir=${UPPDOT_TMPDIR:-/tmp}
+
+# Help Info
+print_help() {
+    cat << HERE
+Usage: $(basename $0) [CMD] ...
+
+A simple tool to run command on the remote hosts in parallel
+
+Config:
+
+    UPPDOT_REMOTES (required)
+        Remote hostname list, separated by space
+
+    UPPDOT_TMPDIR (default: /tmp)
+        Local tmp directory to store log temporarily
+
+    UPPDOT_DEFAULT_CMD (optional)
+        Default command
+
+HERE
+}
+
+# Show Help Info
+if [ "$1" = "-h" -o "$1" = "--help" -o -z "$cmd_template" ]; then
+    print_help
+    exit 0
+fi
+
+# Check Remote Hostnames
+if [ -z "$remotes" ]; then
+    print_help >&2
+    echo 'Please set UPPDOT_REMOTES env' >&2
+fi
+
+# Run
+set +m
+for remote in $remotes
+do
+    cmd=$(echo "$cmd_template"|sed "s/{}/$remote/g")
+    {
+        ssh $remote -t "bash -ic '($cmd)'" 2>&1 >"$tmpdir/uppdot-$remote.log" \
+            | sed "s/^/[$remote] | /g" \
+            &
+    }
+done
+set -m
+wait
+
+# Print Log
+for remote in $remotes
+do
+    printf "\033[032m>>>> $remote <<<<\033[0m\n\r"
+    stty sane
+    cat "$tmpdir/uppdot-$remote.log"
+    stty sane
+done
+
