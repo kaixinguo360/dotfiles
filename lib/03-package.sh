@@ -16,7 +16,7 @@ install_pkg() {
         [ -z "$IS_UPDATED" ] && { 
             echo -n " - updating... " \
                 && $SUDO apt-get update -q \
-                    | spinner \
+                    2>&1 | spinner \
                     > $TMP_PATH/install_pkg.log \
                 && rm $TMP_PATH/install_pkg.log \
                 && export IS_UPDATED='y' \
@@ -29,7 +29,7 @@ install_pkg() {
                 -o Dpkg::Use-Pty=0 \
                 --no-install-recommends \
                 -y -q $@ \
-                | spinner \
+                2>&1 | spinner \
                 > $TMP_PATH/install_pkg.log \
             && rm $TMP_PATH/install_pkg.log \
             && echo "done."
@@ -39,7 +39,7 @@ install_pkg() {
         LANG=C install_epel
         echo -n " - installing... " \
             && LANG=C $SUDO yum install -y $@ \
-                | spinner \
+                2>&1 | spinner \
                 > $TMP_PATH/install_pkg.log \
             && rm $TMP_PATH/install_pkg.log \
             && echo "done."
@@ -48,7 +48,7 @@ install_pkg() {
     [ "$PMG" = "apk" ] && {
         echo -n " - installing... " \
             && $SUDO apk add --no-cache $@ \
-                | spinner \
+                2>&1 | spinner \
                 > $TMP_PATH/install_pkg.log \
             && rm $TMP_PATH/install_pkg.log \
             && echo "done."
@@ -116,7 +116,7 @@ remove_pkg() {
                 -o Dpkg::Use-Pty=0 \
                 --auto-remove \
                 -y -q $@ \
-                | spinner \
+                2>&1 | spinner \
                 > $TMP_PATH/remove_pkg.log \
             && rm $TMP_PATH/remove_pkg.log \
             && echo done.
@@ -125,7 +125,7 @@ remove_pkg() {
     [ "$PMG" = "yum" ] && {
         echo -n " - removing... " \
             && LANG=C $SUDO yum remove -y $@ \
-                | spinner \
+                2>&1 | spinner \
                 > $TMP_PATH/remove_pkg.log \
             && rm $TMP_PATH/remove_pkg.log \
             && echo done.
@@ -134,7 +134,7 @@ remove_pkg() {
     [ "$PMG" = "apk" ] && {
         echo -n " - removing... " \
             && $SUDO apk del --no-cache $@ \
-                | spinner \
+                2>&1 | spinner \
                 > $TMP_PATH/remove_pkg.log \
             && rm $TMP_PATH/remove_pkg.log \
             && echo done.
@@ -319,8 +319,9 @@ install_epel() {
                 /etc/yum.repos.d/epel.repo
             $SUDO yum clean all
             $SUDO yum makecache
-        } | spinner \
-          > $TMP_PATH/install_epel.log \
+        } \
+            2>&1 | spinner \
+            > $TMP_PATH/install_epel.log \
         && rm $TMP_PATH/install_epel.log \
         && echo "done."
     }
