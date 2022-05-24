@@ -8,11 +8,13 @@
 PMG="unkown"
 [ -n "$(command -v apk)" ] && PMG="apk"
 [ -n "$(command -v apt-get)" ] && PMG="apt"
+[ -n "$(command -v yum)" ] && PMG="yum"
 [ -n "$IS_TERMUX" ] && PMG="termux"
 
 # Get Tmp Dir
 [ "$PMG" = "apk" ] && TMP_PATH="/tmp"
 [ "$PMG" = "apt" ] && TMP_PATH="/tmp"
+[ "$PMG" = "yum" ] && TMP_PATH="/tmp"
 [ "$PMG" = "termux" ] && TMP_PATH=$(realpath "$HOME/../usr/tmp")
 
 # Default Arguments
@@ -50,8 +52,13 @@ is_installed() {
     set "$(pmg_filter $*)"
     for CMD in $@
     do
-        [ "$PMG" = "apt" -o "$PMG" = "termux" ] && [ -z "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
-        [ "$PMG" = "apk" ] && [ -z "$(apk info 2>/dev/null|sed -n '/^'$CMD'$/p')" ] && return 1
+        if [ "$PMG" = "apt" -o "$PMG" = "termux" ]; then
+            [ -z "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
+        elif [ "$PMG" = "yum" ]; then
+            yum list installed $CMD >/dev/null 2>&1 || return 1
+        elif [ "$PMG" = "apk" ]; then
+            [ -z "$(apk info 2>/dev/null|sed -n '/^'$CMD'$/p')" ] && return 1
+        fi
     done
     return 0
 }
@@ -61,8 +68,13 @@ not_installed() {
     set "$(pmg_filter $*)"
     for CMD in $@
     do
-        [ "$PMG" = "apt" -o "$PMG" = "termux" ] && [ -n "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
-        [ "$PMG" = "apk" ] && [ -n "$(apk info 2>/dev/null|sed -n '/^'$CMD'$/p')" ] && return 1
+        if [ "$PMG" = "apt" -o "$PMG" = "termux" ]; then
+            [ -n "$(dpkg -s $CMD 2>/dev/null)" ] && return 1
+        elif [ "$PMG" = "yum" ]; then
+            yum list installed $CMD >/dev/null 2>&1 && return 1
+        elif [ "$PMG" = "apk" ]; then
+            [ -n "$(apk info 2>/dev/null|sed -n '/^'$CMD'$/p')" ] && return 1
+        fi
     done
     return 0
 }

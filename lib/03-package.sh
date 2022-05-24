@@ -11,8 +11,8 @@ install_pkg() {
         is_installed $@ && { echo "Packages '$@' installed"; return 0; }
     }
     echo "Install Packages: $@"
-    [ "$PMG" = "termux" ] && install_pointless
     [ "$PMG" = "apt" -o "$PMG" = "termux" ] && {
+        [ "$PMG" = "termux" ] && install_pointless
         [ -z "$IS_UPDATED" ] && { 
             echo -n " - updating... " \
                 && $SUDO apt-get update -q \
@@ -29,6 +29,16 @@ install_pkg() {
                 -o Dpkg::Use-Pty=0 \
                 --no-install-recommends \
                 -y -q $@ \
+                | spinner \
+                > $TMP_PATH/install_pkg.log \
+            && rm $TMP_PATH/install_pkg.log \
+            && echo "done."
+        return
+    }
+    [ "$PMG" = "yum" ] && {
+        LANG=C install_epel
+        echo -n " - installing... " \
+            && LANG=C $SUDO yum install -y $@ \
                 | spinner \
                 > $TMP_PATH/install_pkg.log \
             && rm $TMP_PATH/install_pkg.log \
@@ -112,9 +122,18 @@ remove_pkg() {
             && echo done.
         return
     }
+    [ "$PMG" = "yum" ] && {
+        echo -n " - removing... " \
+            && LANG=C $SUDO yum remove -y $@ \
+                | spinner \
+                > $TMP_PATH/remove_pkg.log \
+            && rm $TMP_PATH/remove_pkg.log \
+            && echo done.
+        return
+    }
     [ "$PMG" = "apk" ] && {
         echo -n " - removing... " \
-            && SUDO apk del --no-cache $@ \
+            && $SUDO apk del --no-cache $@ \
                 | spinner \
                 > $TMP_PATH/remove_pkg.log \
             && rm $TMP_PATH/remove_pkg.log \
@@ -272,7 +291,7 @@ _close_port() {
 # Termux Pointless #
 ####################
 
-# Install Pointless source
+# Install Termux Pointless Source
 install_pointless() {
     [ -n "$NEED_POINTLESS" ] && {
         unset NEED_POINTLESS
@@ -280,6 +299,30 @@ install_pointless() {
         wget https://its-pointless.github.io/setup-pointless-repo.sh -O setup-pointless-repo.sh
         bash setup-pointless-repo.sh
         rm -f setup-pointless-repo.sh pointless.gpg
+    }
+}
+
+###############
+# CentOS EPEL #
+###############
+
+# Install CentOS EPEL Source
+install_epel() {
+    [ ! -f "/etc/yum.repos.d/epel.repo" ] && {
+        echo -n " - installing epel repo... "
+        {
+            $SUDO yum install -y epel-release
+            $SUDO sed -e 's|^metalink=|#metalink=|g' \
+                -e 's|^#baseurl=https\?://download.fedoraproject.org/pub/epel/|baseurl=https://mirrors.ustc.edu.cn/epel/|g' \
+                -e 's|^#baseurl=https\?://download.example/pub/epel/|baseurl=https://mirrors.ustc.edu.cn/epel/|g' \
+                -i.bak \
+                /etc/yum.repos.d/epel.repo
+            $SUDO yum clean all
+            $SUDO yum makecache
+        } | spinner \
+          > $TMP_PATH/install_epel.log \
+        && rm $TMP_PATH/install_epel.log \
+        && echo "done."
     }
 }
 
