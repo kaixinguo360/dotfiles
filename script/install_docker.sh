@@ -9,9 +9,8 @@ fi
 
 # Check Dependencies
 not_support_docker $1
-only_support $1 apt
 has docker && [ "$1" != "-f" ] && echo 'docker installed' && exit 0
-need curl apt-transport-https ca-certificates
+need curl ca-certificates @apt:apt-transport-https
 
 # Download && Run script.sh
 cd \
@@ -23,7 +22,7 @@ restart_service docker
 
 # Executing the Docker Command Without Sudo
 echo -e "\nMaybe you should use this command to add specified user to docker group"
-echo -e "\n  $SUDO usermod -aG docker $USER\n"
+echo -e "\n  $SUDO usermod -aG docker ${USER:-<your_user_name>}\n"
 [ -n "$USER" ] && $SUDO usermod -aG docker $USER
 exit 0
 

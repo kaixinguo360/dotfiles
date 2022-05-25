@@ -9,13 +9,22 @@ fi
 
 # Check Dependencies
 not_support_docker $1
-only_support $1 apt
 has docker && [ "$1" != "-f" ] && echo 'docker installed' && exit 0
-need curl apt-transport-https ca-certificates
+need curl ca-certificates @apt:apt-transport-https
 
-# Add apt source mirror
-$sudo sh -c "echo 'deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable' > /etc/apt/sources.list.d/docker.list"
-$sudo sh -c "curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add -"
+# Add source mirror
+case "$PMG" in
+    apt)
+        $sudo sh -c "echo 'deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable' > /etc/apt/sources.list.d/docker.list"
+        $sudo sh -c "curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add -"
+        ;;
+    yum)
+        install_pkg yum-utils device-mapper-persistent-data lvm2
+        $sudo yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+        $sudo sed -i 's+download.docker.com+mirrors.aliyun.com/docker-ce+' /etc/yum.repos.d/docker-ce.repo
+        $sudo yum makecache fast
+        ;;
+esac
 
 # Install docker
 install_pkg docker-ce
@@ -34,7 +43,7 @@ restart_service docker
 
 # Executing the Docker Command Without Sudo
 echo -e "\nMaybe you should use this command to add specified user to docker group"
-echo -e "\n  $SUDO usermod -aG docker $USER\n"
+echo -e "\n  $SUDO usermod -aG docker ${USER:-<your_user_name>}\n"
 [ -n "$USER" ] && $SUDO usermod -aG docker $USER
 exit 0
 
