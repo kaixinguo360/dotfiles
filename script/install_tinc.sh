@@ -8,7 +8,7 @@ if [[ $1 = "-h" || $1 = "--help" ]];then
 fi
 
 # Check Dependencies
-only_support $1 apt apk
+only_support $1 apt apk yum
 has tincd && [ "$1" != "-f" ] && echo 'tinc installed' && exit 0
 has scp ssh || { echo "Can't find 'scp' and 'ssh' command, please install them."; exit 1; }
 [ "$1" = "-f" ] && shift
