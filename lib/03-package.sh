@@ -11,6 +11,7 @@ install_pkg() {
         is_installed $@ && { echo "Packages '$@' installed"; return 0; }
     }
     echo "Install Packages: $@"
+    export LANG=C
     [ "$PMG" = "apt" -o "$PMG" = "termux" ] && {
         [ "$PMG" = "termux" ] && install_pointless
         [ -z "$IS_UPDATED" ] && { 
@@ -22,36 +23,28 @@ install_pkg() {
                 && export IS_UPDATED='y' \
                 && echo "done."
         }
-        echo -n " - installing... " \
-            && DEBIAN_FRONTEND=noninteractive $SUDO apt-get install \
+        echo -n " - installing... "
+        DEBIAN_FRONTEND=noninteractive \
+        _exec install_pkg \
+            $SUDO apt-get install \
                 -o Dpkg::Options::="--force-confdef" \
                 -o Dpkg::Options::="--force-confold" \
                 -o Dpkg::Use-Pty=0 \
                 --no-install-recommends \
-                -y -q $@ \
-                2>&1 | spinner \
-                > $TMP_PATH/install_pkg.log \
-            && rm $TMP_PATH/install_pkg.log \
-            && echo "done."
+                -y -q $@
         return
     }
     [ "$PMG" = "yum" ] && {
-        LANG=C install_epel
-        echo -n " - installing... " \
-            && LANG=C $SUDO yum install -y $@ \
-                2>&1 | spinner \
-                > $TMP_PATH/install_pkg.log \
-            && rm $TMP_PATH/install_pkg.log \
-            && echo "done."
+        install_epel
+        echo -n " - installing... "
+        _exec install_pkg \
+            $SUDO yum install -y $@
         return
     }
     [ "$PMG" = "apk" ] && {
-        echo -n " - installing... " \
-            && $SUDO apk add --no-cache $@ \
-                2>&1 | spinner \
-                > $TMP_PATH/install_pkg.log \
-            && rm $TMP_PATH/install_pkg.log \
-            && echo "done."
+        echo -n " - installing... "
+        _exec install_pkg \
+            $SUDO apk add --no-cache $@
         return
     }
 }
@@ -109,37 +102,42 @@ remove_pkg() {
     }
     echo "Remove Packages: $@"
     [ "$PMG" = "apt" -o "$PMG" = "termux" ] && {
-        echo -n " - removing... " \
-            && DEBIAN_FRONTEND=noninteractive $SUDO apt-get purge \
+        echo -n " - removing... "
+        DEBIAN_FRONTEND=noninteractive \
+        _exec remove_pkg \
+            $SUDO apt-get purge \
                 -o Dpkg::Options::="--force-confdef" \
                 -o Dpkg::Options::="--force-confold" \
                 -o Dpkg::Use-Pty=0 \
                 --auto-remove \
-                -y -q $@ \
-                2>&1 | spinner \
-                > $TMP_PATH/remove_pkg.log \
-            && rm $TMP_PATH/remove_pkg.log \
-            && echo done.
+                -y -q $@
         return
     }
     [ "$PMG" = "yum" ] && {
-        echo -n " - removing... " \
-            && LANG=C $SUDO yum remove -y $@ \
-                2>&1 | spinner \
-                > $TMP_PATH/remove_pkg.log \
-            && rm $TMP_PATH/remove_pkg.log \
-            && echo done.
+        echo -n " - removing... "
+        _exec remove_pkg \
+            $SUDO yum remove -y $@
         return
     }
     [ "$PMG" = "apk" ] && {
-        echo -n " - removing... " \
-            && $SUDO apk del --no-cache $@ \
-                2>&1 | spinner \
-                > $TMP_PATH/remove_pkg.log \
-            && rm $TMP_PATH/remove_pkg.log \
-            && echo done.
+        echo -n " - removing... "
+        _exec remove_pkg \
+            $SUDO apk del --no-cache $@
         return
     }
+    if [ -z "$result" ]; then
+        rm $TMP_PATH/remove_pkg.log
+        echo "done."
+        return 0
+    else
+        echo "failed"
+        echo " + tail $TMP_PATH/remove_pkg.log"
+        echo ' | -----'
+        tail $TMP_PATH/remove_pkg.log \
+            | sed 's/^/ | /g'
+        echo ' +'
+        return 1
+    fi
 }
 
 remove_list() {
@@ -184,6 +182,37 @@ remove_tool() {
 #########
 # Other #
 #########
+
+# Execute Command and Save Log
+_exec() {
+    logfile="$TMP_PATH/${1}.log"
+    shift
+
+    printf '%s\n-----\n' "$*" > "$logfile"
+
+    exec 3>&1
+    result=`(
+        (
+            $@ 2>&1 \
+                || echo "failed" >&3
+        ) | spinner >> "$logfile" \
+    ) 3>&1`
+    exec 3>&-
+
+    if [ -z "$result" ]; then
+        rm "$logfile"
+        echo "done."
+        return 0
+    else
+        echo "failed"
+        echo ' +'
+        tail "$logfile" \
+            | sed 's/^/ | /g'
+        echo ' +'
+        echo "For more information, see the file $logfile"
+        return 1
+    fi
+}
 
 # Ensure specified tools has been installed
 need() {
@@ -234,29 +263,57 @@ spinner() {
 # Start Service
 # Usage: start_service SERVICE_NAME
 start_service() {
-    only_support apt
-    echo -n "Starting $1 service... " \
-        && $SUDO service $1 stop >/dev/null 2>&1 \
-        && $SUDO service $1 start >/dev/null \
-        && echo 'done.'
+    echo -n "Starting $1 service... "
+    if has service; then
+        $SUDO service $1 stop >/dev/null 2>&1
+        _exec start_service \
+            $SUDO service $1 start
+        return
+    elif has systemctl; then
+        $SUDO systemctl stop "$1.service" >/dev/null 2>&1
+        _exec start_service \
+            $SUDO systemctl start "$1.service"
+        return
+    else
+        echo "skipped"
+        return 1
+    fi
 }
 
 # Stop Service
 # Usage: stop_service SERVICE_NAME
 stop_service() {
-    only_support apt
-    echo -n "Stopping $1 service... " \
-        && $SUDO service $1 stop >/dev/null \
-        && echo 'done.'
+    echo -n "Stopping $1 service... "
+    if has service; then
+        _exec stop_service \
+            $SUDO service $1 stop
+        return
+    elif has systemctl; then
+        _exec stop_service \
+            $SUDO systemctl stop "$1.service"
+        return
+    else
+        echo "skipped"
+        return 1
+    fi
 }
 
 # Retart Service
 # Usage: restart_service SERVICE_NAME
 restart_service() {
-    only_support apt
-    echo -n "Restarting $1 service... " \
-        && $SUDO service $1 restart >/dev/null \
-        && echo 'done.'
+    echo -n "Restarting $1 service... "
+    if has service; then
+        _exec restart_service \
+            $SUDO service $1 restart
+        return
+    elif has systemctl; then
+        _exec restart_service \
+            $SUDO systemctl restart "$1.service"
+        return
+    else
+        echo "skipped"
+        return 1
+    fi
 }
 
 ########
