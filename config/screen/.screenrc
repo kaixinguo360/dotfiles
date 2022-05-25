@@ -1,4 +1,5 @@
 startup_message off
 altscreen on
 termcapinfo xterm* ti@:te@
+term screen-256color
 
