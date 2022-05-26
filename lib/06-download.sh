@@ -17,7 +17,7 @@ download() {
     # Download
     echo "Downloading '$REMOTE_FILE' to '${LOCAL_FILE}'... " \
         && $SUDO mkdir -p "$(dirname $LOCAL_FILE)" \
-        && $SUDO curl -f#SL "$REMOTE_FILE" -o "$LOCAL_FILE" \
+        && $SUDO curl -kf#SL "$REMOTE_FILE" -o "$LOCAL_FILE" \
         && $SUDO chmod $MODE "$LOCAL_FILE" \
         && echo "Saved to $LOCAL_FILE" && return 0 \
         || echo "Download '${LOCAL_FILE##*/}' failed." >&2 && return 1
@@ -44,7 +44,7 @@ download_and_run() {
     # Download
     echo "Downloading remote script '$SCRIPT_NAME' from '$REMOTE_SCRIPT'... " \
         && $SUDO mkdir -p "$(dirname $LOCAL_SCRIPT)" \
-        && $SUDO curl -f#SL "$REMOTE_SCRIPT" -o "$LOCAL_SCRIPT" \
+        && $SUDO curl -kf#SL "$REMOTE_SCRIPT" -o "$LOCAL_SCRIPT" \
         || { echo "Download remote script '${SCRIPT_NAME}' failed." >&2; return 1; }
 
     # Run
