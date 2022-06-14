@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Load libs
+. $(dirname $(realpath $0))/lib.sh
+
+# Show Help Info
+if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ];then
+    echo "Usage: ${0##*/} [-i] TOOL [OPTION]..."
+    echo "Search tool"
+    exit 0
+fi
+
+# Search tool
+search_tool $@ || {
+    echo "An error occured while searching '$@'."
+    exit 1
+}
+

@@ -125,19 +125,6 @@ remove_pkg() {
             $SUDO apk del --no-cache $@
         return
     }
-    if [ -z "$result" ]; then
-        rm $TMP_PATH/remove_pkg.log
-        echo "done."
-        return 0
-    else
-        echo "failed"
-        echo " + tail $TMP_PATH/remove_pkg.log"
-        echo ' | -----'
-        tail $TMP_PATH/remove_pkg.log \
-            | sed 's/^/ | /g'
-        echo ' +'
-        return 1
-    fi
 }
 
 remove_list() {
@@ -177,6 +164,90 @@ remove_tool() {
         fi
     [ -z "$INTERACTIVE" ] && export IN_SCRIPT=$BACKUP
     return $RET
+}
+
+###############
+# Search-tool #
+###############
+
+# Search Packages
+search_pkg() {
+    [ -z "$1" ] && return 0
+    set "$(pmg_filter $*)"
+    echo "Searching package \`$*\`... " >&2
+    [ "$PMG" = "apt" -o "$PMG" = "termux" ] && {
+        [ -z "$IS_UPDATED" ] && { 
+            $SUDO apt-get update -q \
+                    2>&1 | spinner \
+                    > $TMP_PATH/install_pkg.log \
+                && rm $TMP_PATH/install_pkg.log \
+                && export IS_UPDATED='y'
+        }
+        {
+            $SUDO dpkg -S */$@
+            $SUDO apt-cache search "^.*$@.*$"
+        } 2>/dev/null \
+            | spinner \
+            | sed -E \
+                -e 's/ - .*$|: .*$//g' \
+            | sort -u
+        return
+    }
+    [ "$PMG" = "yum" ] && {
+        {
+            $SUDO yum search $@
+            $SUDO yum provides $@
+        } 2>/dev/null \
+            | spinner \
+            | sed -E \
+                -e '1,/^=/d' \
+                -e '/^[a-z0-9]/!d' \
+                -e 's/\..* : .*$//g' \
+                -e 's/^[0-9]+://g' \
+                -e 's/(-[vr]?[.0-9]*)+$//g' \
+            | sort -u
+        return
+    }
+    [ "$PMG" = "apk" ] && {
+        {
+            $SUDO apk search --no-cache -d $@
+            $SUDO apk info --who-owns `which $@`
+        } 2>/dev/null \
+            | spinner \
+            | sed -E \
+                -e '/^fetch /d' \
+                -e 's/^.* owned by //g' \
+                -e 's/(-[vr]?[.0-9]*)+$//g' \
+            | sort -u
+        return
+    }
+}
+
+search_list() {
+    find_resource -n list/*${1}*.list \
+        | sed 's/^/list  |  /g' \
+        | sort -u
+}
+
+search_script() {
+    find_resource -n script/install_*${1}*.sh \
+        | sed 's/^install_//g' \
+        | sed 's/^/sh  |  /g' \
+        | sort -u
+}
+
+# Search Tools
+search_tool() {
+    TOOL="$1"
+    [ -z "$TOOL" ] && return 0
+    if [ "${TOOL##*.}" = "$TOOL" ];then
+        search_pkg $TOOL | grep --color=always -E "$TOOL|$"
+    elif [ "${TOOL##*.}" = "list" ];then
+        search_list ${TOOL%.*}
+    elif [ "${TOOL##*.}" = "sh" ];then
+        search_script ${TOOL%.*}
+    fi
+    return 0
 }
 
 #########
