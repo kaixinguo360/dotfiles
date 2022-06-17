@@ -1,0 +1,8 @@
+#!/bin/sh
+
+sh << _____HERE_____
+cat << ____HERE____
+$(cat "${1:-/dev/stdin}" | sed '1 { /^#!.*[/ ]'"$(basename "$0")"'/d }')
+____HERE____
+_____HERE_____
+
