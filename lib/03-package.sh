@@ -400,7 +400,12 @@ expose_port() {
         && echo 'done.'
 }
 _expose_port() {
-    has ufw && $SUDO ufw allow $1
+    if has ufw; then
+        $SUDO ufw allow $1
+    else
+        echo 'skipped' >&2
+        return 1
+    fi
 }
 
 # Close port
@@ -412,7 +417,12 @@ close_port() {
         && echo 'done.'
 }
 _close_port() {
-    has ufw && $SUDO ufw delete allow $1
+    if has ufw; then
+        $SUDO ufw delete allow $1
+    else
+        echo 'skipped' >&2
+        return 1
+    fi
 }
 
 ####################
