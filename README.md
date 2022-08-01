@@ -23,7 +23,7 @@ You can also use them in Docker or WSL
 Run below commands to install this dotfiles to your linux server.
 
 ```
-git clone git@github.com:kaixonguo360/dotfiles ~/.dotfiles \
+git clone git@github.com:kaixinguo360/dotfiles ~/.dotfiles \
     && ~/.dotfiles/install.sh \
     && source ~/.bashrc
 ```
