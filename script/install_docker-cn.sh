@@ -17,6 +17,7 @@ case "$PMG" in
     apt)
         $sudo sh -c "echo 'deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable' > /etc/apt/sources.list.d/docker.list"
         $sudo sh -c "curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add -"
+        $sudo sh -c "apt update"
         ;;
     yum)
         install_pkg yum-utils device-mapper-persistent-data lvm2
