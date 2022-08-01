@@ -18,18 +18,19 @@ cd /etc/apt
 #    && $SUDO sed -i 's@\(deb-*s*r*c*\) \+\(https*://[^ ]*\) \+\([^ ]*\) \+\([^ ]*\)\(.*\)@\1 http://mirrors.aliyun.com/ubuntu/ \3 \4\5@' sources.list \
 #    && echo done.
 echo -n "Changing apt source to 'mirrors.aliyun.com'... " \
+    && release_name="$(lsb_release -cs)" \
     && $SUDO cp sources.list sources.list.bak \
     && $SUDO bash -ic 'cat > sources.list' << HERE
-deb http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ ${release_name} main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ ${release_name}-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ ${release_name}-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ ${release_name}-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ ${release_name}-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ ${release_name} main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ ${release_name}-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ ${release_name}-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ ${release_name}-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ ${release_name}-backports main restricted universe multiverse
 HERE
 [ "$?" = "0" ] \
     && echo done. \
