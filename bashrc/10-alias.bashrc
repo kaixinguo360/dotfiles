@@ -1,6 +1,7 @@
 # Alias
 alias c=clear
 alias cd..='cd ..'
+alias ..='cd ..'
 alias vi=vim
 alias sl='sl -e'
 alias dul='sudo du -ha --max-depth=1'
