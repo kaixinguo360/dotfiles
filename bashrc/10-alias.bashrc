@@ -18,6 +18,7 @@ alias upgradedotfile='(cd "$DOTFILE_HOME"; \
     git pull) && \
     reloadbashrc'
 alias bench.sh='curl -Lso- bench.sh | bash'
+[ -z "$(command -v tailf)" ] && alias tailf='tail -f'
 s() { sudo bash -ic "$*"; }
 complete -F _command s
 forceumount() { fusermount -u $1 || sudo umount -l $1; }
