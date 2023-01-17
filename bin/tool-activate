@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Params
+PROFILE_NAME="${1?}"
+PROFILE_FILE="$(find-resource "dc-tool/$PROFILE_NAME")"
+BASE_SCRIPT="enter-$PROFILE_NAME"
+TMP_DIR="$(mktemp -d)"
+
+# Load Config
+[ ! -f "$PROFILE_FILE" ] && {
+    echo "No such profile: $PROFILE_NAME" >&2
+    exit 1
+}
+. "$PROFILE_FILE"
+
+# Create tmp dir
+rm -rf "$TMP_DIR"
+mkdir -p "$TMP_DIR"
+
+# Create enter-tool file
+sed -e "s#\\\$RUN_IMAGE#$RUN_IMAGE#g" \
+    -e "s#\\\$BASE_SCRIPT#$BASE_SCRIPT#g" \
+    > "$TMP_DIR/$BASE_SCRIPT" << 'HERE'
+#!/bin/sh
+docker run --rm -it \
+    -v "$HOME/dc/home":"/root" \
+    -v "$HOME/.dotfiles":"/root/.dotfiles" \
+    -v "${RUN_ROOT_DIR:-$PWD}":"${RUN_ROOT_DIR:-$PWD}" \
+    -w "$PWD" \
+    $(env | sed -E \
+        -e '/^[A-Za-z0-9_]+=.*$/!d' \
+        -e 's/^([A-Za-z0-9_]+)=.*$/\1/g' \
+        -e "/^(PATH|HOME|PWD|TERM|TERMCAP|SHELL|USER)$/d" \
+        -e 's/^/-e /g'
+    ) \
+    "$RUN_IMAGE" \
+    "$(basename "$0" | sed "s/^$BASE_SCRIPT$/sh/g")" \
+    "$@"
+HERE
+chmod +x "$TMP_DIR/$BASE_SCRIPT"
+
+# Create soft link
+printf '%s\n' "$RUN_TOOLS" \
+    | sed -E -e 's/ +/\n/g' -e '/^$/d' \
+    | xargs -n1 -i ln -s "$TMP_DIR/$BASE_SCRIPT" "$TMP_DIR/{}"
+
+# Run Bash
+bash --rcfile <(
+cat << HERE
+. ~/.bashrc
+PS1="($PROFILE_NAME) \$PS1"
+PATH="$TMP_DIR:\$PATH"
+export RUN_ROOT_DIR="\$PWD"
+HERE
+)
+
+# Clean tmp dir
+rm -rf "$TMP_DIR"
+
