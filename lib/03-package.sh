@@ -259,7 +259,7 @@ _exec() {
     logfile="$TMP_PATH/${1}.log"
     shift
 
-    printf '%s\n-----\n' "$*" > "$logfile"
+    printf '+ %s\n-----\n' "$*" > "$logfile"
 
     exec 3>&1
     result=`(
