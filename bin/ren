@@ -44,13 +44,21 @@ log_error() { [ -n "$LOG2" ] && log "\033[31m[ERROR] $1\033[0m" >&2; }
 
 # Generate Target Name #
 gen_target_name() {
-    t_basename=$(eval echo $(echo "$NAME_PATTERN" \
-        | sed 's#{\(url\|md5\|sha\)}#$(\1)#g' \
-        | sed 's#\(%[0-9]*d\)#$(printf \1 $index)#g' \
-        | sed 's#{}#{name}#g' \
-        | sed 's#{\(full\|base\|dir\|ext\)}#{\1name}#g' \
-        | sed 's#{\([^{}]*\)}#${s_\1}#g' \
-    ))
+    t_basename=$(eval echo "$(echo "$NAME_PATTERN" \
+        | sed -E \
+            -e 's#\\\{#@@1@@#g' \
+            -e 's#\\\}#@@2@@#g' \
+            -e 's#\\:#@@3@@#g' \
+            -e 's#\{(url|md5|sha)\}#$(\1)#g' \
+            -e 's#(%[0-9]*d)#$(printf \1 $index)#g' \
+            -e 's#\{([^{}:]*):([^{}]*)\}#$(echo "{\1}"|sed -E "\2")#g' \
+            -e 's#\{\}#{name}#g' \
+            -e 's#\{(full|base|dir|ext)\}#{\1name}#g' \
+            -e 's#\{([^{}]*)\}#${s_\1}#g' \
+            -e 's#@@1@@#{#g' \
+            -e 's#@@2@@#}#g' \
+            -e 's#@@3@@#:#g'
+    )")
 }
 
 # Main #
@@ -70,7 +78,7 @@ main() {
     s_basename=${s_fullname%.*}
     
     # Get s_extname
-    has_ext="$(echo $s_fullname|grep '\.')"
+    has_ext="$(echo "$s_fullname"|grep '\.')"
     if [ -n "$has_ext" ]; then
         s_extname=${s_fullname##*.}
     else
@@ -102,13 +110,14 @@ main() {
     }
 
     # Generate cmd
-    cmd=$(eval echo $(echo "$COMMAND_PATTERN" \
-        | sed 's#{\(url\|md5\|sha\)}#$(\1)#g' \
-        | sed 's#\(%[0-9]*d\)#$(printf \1 $index)#g' \
-        | sed 's#{\(s\|source\)}#{s_path}#g' \
-        | sed 's#{\(t\|target\)}#{t_path}#g' \
-        | sed 's#{\([^{}]*\)}#\\"${\1}\\"#g' \
-    ))
+    cmd=$(eval echo "$(echo "$COMMAND_PATTERN" \
+        | sed \
+            -e 's#{\(url\|md5\|sha\)}#$(\1)#g' \
+            -e 's#\(%[0-9]*d\)#$(printf \1 $index)#g' \
+            -e 's#{\(s\|source\)}#{s_path}#g' \
+            -e 's#{\(t\|target\)}#{t_path}#g' \
+            -e 's#{\([^{}]*\)}#\\"${\1}\\"#g' \
+    )")
 
     # Dry run
     [ -n "$DRY_RUN" ] && {
