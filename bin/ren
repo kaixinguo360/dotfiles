@@ -12,8 +12,8 @@ IS_EXTRACT_EXT=
 DEFAULT_EXT=
 
 # Pattern String #
-NAME_PATTERN='$s_name'
-COMMAND_PATTERN='mv \"$s_path\" \"$t_path\"'
+NAME_PATTERN='{name}'
+COMMAND_PATTERN='mv {source} {target}'
 
 # -----------------------------
 # s_path(path)=/mnt/foo/a.out
@@ -50,11 +50,11 @@ gen_target_name() {
             -e 's#\\\}#@@2@@#g' \
             -e 's#\\:#@@3@@#g' \
             -e 's#\{(url|md5|sha)\}#$(\1)#g' \
-            -e 's#(%[0-9]*d)#$(printf \1 $index)#g' \
-            -e 's#\{([^{}:]*):([^{}]*)\}#$(echo "{\1}"|sed -E "\2")#g' \
+            -e 's#(%[0-9]*d)#"$(printf \1 $index)"#g' \
+            -e 's#\{([^{}:]*):([^{}]*)\}#"$(echo {\1}|sed -E "\2")"#g' \
             -e 's#\{\}#{name}#g' \
             -e 's#\{(full|base|dir|ext)\}#{\1name}#g' \
-            -e 's#\{([^{}]*)\}#${s_\1}#g' \
+            -e 's#\{([^{}]*)\}#"${s_\1}"#g' \
             -e 's#@@1@@#{#g' \
             -e 's#@@2@@#}#g' \
             -e 's#@@3@@#:#g'
@@ -64,12 +64,12 @@ gen_target_name() {
 # Main #
 main() {
 
-    index=$((index+1))
-
     [ -f "$1" ] || {
         log_error "Not a regular file: $1"
         return 1
     }
+
+    index=$((index+1))
 
     # ---- begin ---- #
     s_path=$(realpath -s "$1")
@@ -111,26 +111,28 @@ main() {
 
     # Generate cmd
     cmd=$(eval echo "$(echo "$COMMAND_PATTERN" \
-        | sed \
-            -e 's#{\(url\|md5\|sha\)}#$(\1)#g' \
-            -e 's#\(%[0-9]*d\)#$(printf \1 $index)#g' \
-            -e 's#{\(s\|source\)}#{s_path}#g' \
-            -e 's#{\(t\|target\)}#{t_path}#g' \
-            -e 's#{\([^{}]*\)}#\\"${\1}\\"#g' \
+        | sed -E \
+            -e 's#\{(url|md5|sha)\}#$(\1)#g' \
+            -e 's#(%[0-9]*d)#$(printf \1 $index)#g' \
+            -e 's#\{(s|source)\}#{s_path}#g' \
+            -e 's#\{(t|target)\}#{t_path}#g' \
+            -e 's#\{([^\{\}]*)\}#\\"${\1}\\"#g' \
+            -e 's#\$([a-zA-Z0-9_]+)#${\1}#g' \
+            -e 's#(\$\{[^}]+\})#"\1"#g' \
     )")
 
     # Dry run
     [ -n "$DRY_RUN" ] && {
-        log_info "\033[32m$cmd\033[0m"
+        printf '[INFO] \033[32m%s\033[0m\n' "$cmd"
         return 0
     }
 
     # Exec $cmd
-    [ -n "$LOG2" ] && log_info "\033[32m+ $cmd\033[0m"
-    eval $cmd && {
+    [ -n "$LOG2" ] && printf '[INFO] \033[32m+ %s\033[0m\n' "$cmd"
+    sh -c "$cmd" && {
         return 0
     } || {
-        log_error "$cmd"
+        printf '\033[31m[ERROR] %s\033[0m\n' "$cmd" >&2
         return 1
     }
 }
@@ -177,12 +179,12 @@ if [ -n "$*" ]; then
         main "$arg"
     done
 else
-    #interactive
-    while read -e -p "> " input
+    #read from pipe
+    while read -p "> " input
     do
-        history -s "$input"
         main "$input"
     done
 fi
 
 [ -n "$DRY_RUN" ] && log_info "No changes to your files done, use -f to finally apply the changes."
+
