@@ -34,6 +34,9 @@ COMMAND_PATTERN='mv {source} {target}'
 url() { urldecode "$s_basename"; }
 sha() { sha1sum "$s_path"|cut -d ' ' -f1; }
 md5() { md5sum "$s_path"|cut -d ' ' -f1; }
+URL() { urldecode "$s_basename"|tr '[a-z]' '[A-Z]'; }
+SHA() { sha1sum "$s_path"|cut -d ' ' -f1|tr '[a-z]' '[A-Z]'; }
+MD5() { md5sum "$s_path"|cut -d ' ' -f1|tr '[a-z]' '[A-Z]'; }
 
 # Log functions #
 log() { echo "$1"|sed 's/%/%%/g'|xargs -i printf {}; echo; }
@@ -49,7 +52,7 @@ gen_target_name() {
             -e 's#\\\{#@@1@@#g' \
             -e 's#\\\}#@@2@@#g' \
             -e 's#\\:#@@3@@#g' \
-            -e 's#\{(url|md5|sha)\}#$(\1)#g' \
+            -e 's#\{(url|md5|sha)\}#$(\1)#ig' \
             -e 's#(%[0-9]*d)#"$(printf \1 $index)"#g' \
             -e 's#\{([^{}:]*):([^{}]*)\}#"$(echo {\1}|sed -E "\2")"#g' \
             -e 's#\{\}#{name}#g' \
@@ -112,7 +115,7 @@ main() {
     # Generate cmd
     cmd=$(eval echo "$(echo "$COMMAND_PATTERN" \
         | sed -E \
-            -e 's#\{(url|md5|sha)\}#$(\1)#g' \
+            -e 's#\{(url|md5|sha)\}#$(\1)#ig' \
             -e 's#(%[0-9]*d)#$(printf \1 $index)#g' \
             -e 's#\{(s|source)\}#{s_path}#g' \
             -e 's#\{(t|target)\}#{t_path}#g' \
