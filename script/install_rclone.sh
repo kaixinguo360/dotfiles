@@ -19,7 +19,8 @@ else
     ARCH="amd64"
     LOCAL=/usr/local/bin/rclone
 fi
-URL="https://downloads.rclone.org/rclone-current-linux-${ARCH}.zip";
+#URL="https://downloads.rclone.org/rclone-current-linux-${ARCH}.zip";
+URL="https://downloads.rclone.org/v1.61.1/rclone-v1.61.1-linux-${ARCH}.zip";
 
 # Download
 $sudo rm -rf "$TMP_PATH/tmp_rclone" "$TMP_PATH/tmp_rclone.zip"
