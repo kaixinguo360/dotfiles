@@ -2,7 +2,7 @@
 
 alias g='git'
 _completion_loader git
-complete -o bashdefault -o default -o nospace -F __git_wrap__git_main g
+complete -o bashdefault -o default -o nospace -F _git g
 
 alias glog='git log'
 alias glg="git log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
