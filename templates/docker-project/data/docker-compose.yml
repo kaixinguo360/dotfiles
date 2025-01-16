@@ -18,12 +18,12 @@ services:
       - external_network
     volumes:
       - data:TEMPLATE_DATA_PATH
-#:media |      - media:/media
-#:rclone|      - rclone:$DEPLOY_RCLONE_LOCAL
+#:media |      - media:$DEPLOY_MEDIA_MOUNT
+#:rclone|      - rclone:$DEPLOY_RCLONE_MOUNT
     deploy:
       replicas: 1
       placement:
-        constraints: 
+        constraints:
           - ${DEPLOY_NODE_WEB:-node.labels.ignore != true}
       labels:
         - "traefik.enable=true" #!no-proxy
