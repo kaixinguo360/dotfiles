@@ -164,3 +164,5 @@ set pastetoggle=<F2>
 set incsearch
 set hlsearch
 
+set viminfo='20,<1000,s1000
+
