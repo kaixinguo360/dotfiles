@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Load libs
+. $(dirname $(realpath $0))/lib.sh
+
+# Show Help Info
+if [ "$1" = "-h" ] || [ "$1" = "--help" ];then
+    echo "Usage: ${0##*/} TEMPLATE [OPTION]..."
+    echo "Install template"
+    exit 0
+fi
+
+install_template() {
+    template="$1"
+    if [ -z "$template" ]; then
+        find_resource --name 'templates/*'
+        return 0
+    fi
+    shift
+    install_file="$(dirname "$(realpath "$0")")/../templates/$template/install.sh"
+    if [ -x "$install_file" ]; then
+        install_file="$(realpath "$install_file")"
+        "$install_file" "$@"
+    else
+        echo "No such template: $template" >&2
+        return 1
+    fi
+}
+
+# Install template
+install_template "$@"
+

@@ -11,6 +11,8 @@ complete -F _removable_tools tool-remove-edit
 
 complete -F _installable_tools tool-test
 
+complete -F _installable_templates tool-template
+
 # Bash-Completion Function #
 
 function _installable_tools() {
@@ -38,6 +40,21 @@ function _removable_tools() {
     lists=$(find-resource --name 'list/*.list')
     scripts=$(find-resource --name 'script/remove_*.sh'|sed 's/^.*remove_//'|sed '/tool.sh/d')
     opts="-i $lists $scripts"
+
+    if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+}
+
+function _installable_templates() {
+    local cur prev opts lists scripts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    templates=$(find-resource --name 'templates/*')
+    opts="$templates"
 
     if [[ ${cur} == * ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
