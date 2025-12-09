@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Params
-PROFILE_NAME="${1?}"
+INPUT_PROFILE_NAME="${1?}"
+PROFILE_NAME="$(printf '%s' "$INPUT_PROFILE_NAME" | sed 's/:.*$//g')"
 PROFILE_FILE="$(find-resource "dc-tool/$PROFILE_NAME")"
 BASE_SCRIPT="enter-$PROFILE_NAME"
 TMP_DIR="$(mktemp -d)"
@@ -13,6 +14,13 @@ TMP_DIR="$(mktemp -d)"
 }
 . "$PROFILE_FILE"
 
+# Custom image tag
+if [ -n "$(printf '%s' "$INPUT_PROFILE_NAME" | grep ':')" ]; then
+    IMAGE_TAG="$(printf '%s' "$INPUT_PROFILE_NAME" | sed 's/^.*://g')"
+    RUN_IMAGE="$(printf '%s' "$RUN_IMAGE" | sed 's/:.*$//g'):$IMAGE_TAG"
+fi
+echo "Use image: $RUN_IMAGE" >&2
+
 # Create tmp dir
 rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"
@@ -23,8 +31,8 @@ sed -e "s#\\\$RUN_IMAGE#$RUN_IMAGE#g" \
     > "$TMP_DIR/$BASE_SCRIPT" << 'HERE'
 #!/bin/sh
 docker run --rm -it \
-    -v "$HOME/dc/home":"/root" \
-    -v "$HOME/.dotfiles":"/root/.dotfiles" \
+    -v "${TOOL_CUSTOM_PATH_HOME:-$HOME/dc/home}":"/root" \
+    -v "${TOOL_CUSTOM_PATH_DOTFILES:-$HOME/.dotfiles}":"/root/.dotfiles" \
     -v "${RUN_ROOT_DIR:-$PWD}":"${RUN_ROOT_DIR:-$PWD}" \
     -w "$PWD" \
     $(env | sed -E \
@@ -33,6 +41,7 @@ docker run --rm -it \
         -e "/^(PATH|HOME|PWD|TERM|TERMCAP|SHELL|USER)$/d" \
         -e 's/^/-e /g'
     ) \
+    $DC_OPTS \
     "$RUN_IMAGE" \
     "$(basename "$0" | sed "s/^$BASE_SCRIPT$/sh/g")" \
     "$@"
@@ -42,13 +51,13 @@ chmod +x "$TMP_DIR/$BASE_SCRIPT"
 # Create soft link
 printf '%s\n' "$RUN_TOOLS" \
     | sed -E -e 's/ +/\n/g' -e '/^$/d' \
-    | xargs -n1 -i ln -s "$TMP_DIR/$BASE_SCRIPT" "$TMP_DIR/{}"
+    | xargs -i ln -s "$TMP_DIR/$BASE_SCRIPT" "$TMP_DIR/{}"
 
 # Run Bash
 bash --rcfile <(
 cat << HERE
 . ~/.bashrc
-PS1="($PROFILE_NAME) \$PS1"
+PS1="($INPUT_PROFILE_NAME) \$PS1"
 PATH="$TMP_DIR:\$PATH"
 export RUN_ROOT_DIR="\$PWD"
 HERE
