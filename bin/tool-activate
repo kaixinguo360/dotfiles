@@ -9,17 +9,17 @@ TMP_DIR="$(mktemp -d)"
 
 # Load Config
 [ ! -f "$PROFILE_FILE" ] && {
-    echo "No such profile: $PROFILE_NAME" >&2
-    exit 1
+  echo "No such profile: $PROFILE_NAME" >&2
+  exit 1
 }
 . "$PROFILE_FILE"
 
 # Custom image tag
 if [ -n "$(printf '%s' "$INPUT_PROFILE_NAME" | grep ':')" ]; then
-    IMAGE_TAG="$(printf '%s' "$INPUT_PROFILE_NAME" | sed 's/^.*://g')"
-    RUN_IMAGE="$(printf '%s' "$RUN_IMAGE" | sed 's/:.*$//g'):$IMAGE_TAG"
+  IMAGE_TAG="$(printf '%s' "$INPUT_PROFILE_NAME" | sed 's/^.*://g')"
+  RUN_IMAGE="$(printf '%s' "$RUN_IMAGE" | sed 's/:.*$//g'):$IMAGE_TAG"
 fi
-echo "Use image: $RUN_IMAGE" >&2
+#echo "Use image: $RUN_IMAGE" >&2
 
 # Create tmp dir
 rm -rf "$TMP_DIR"
@@ -27,33 +27,62 @@ mkdir -p "$TMP_DIR"
 
 # Create enter-tool file
 sed -e "s#\\\$RUN_IMAGE#$RUN_IMAGE#g" \
-    -e "s#\\\$BASE_SCRIPT#$BASE_SCRIPT#g" \
-    > "$TMP_DIR/$BASE_SCRIPT" << 'HERE'
+  -e "s#\\\$BASE_SCRIPT#$BASE_SCRIPT#g" \
+  > "$TMP_DIR/$BASE_SCRIPT" << 'HERE'
 #!/bin/sh
-docker run --rm -it \
+
+run_in_docker() {
+  docker run --rm -it \
     -v "${TOOL_CUSTOM_PATH_HOME:-$HOME/dc/home}":"/root" \
     -v "${TOOL_CUSTOM_PATH_DOTFILES:-$HOME/.dotfiles}":"/root/.dotfiles" \
     -v "${RUN_ROOT_DIR:-$PWD}":"${RUN_ROOT_DIR:-$PWD}" \
     -w "$PWD" \
     $(env | sed -E \
-        -e '/^[A-Za-z0-9_]+=.*$/!d' \
-        -e 's/^([A-Za-z0-9_]+)=.*$/\1/g' \
-        -e "/^(PATH|HOME|PWD|TERM|TERMCAP|SHELL|USER)$/d" \
-        -e 's/^/-e /g'
+      -e '/^[A-Za-z0-9_]+=.*$/!d' \
+      -e 's/^([A-Za-z0-9_]+)=.*$/\1/g' \
+      -e "/^(PATH|HOME|PWD|TERM|TERMCAP|SHELL|USER)$/d" \
+      -e 's/^/-e /g'
     ) \
     $DC_OPTS \
     "$RUN_IMAGE" \
-    "$(basename "$0" | sed "s/^$BASE_SCRIPT$/sh/g")" \
     "$@"
+}
+
+CMD="$(basename "$0")"
+
+if [ "$CMD" = "$BASE_SCRIPT" ]; then
+  if [ -n "$*" ]; then
+    run_in_docker "$@"
+  else
+    run_in_docker sh
+  fi
+else
+  run_in_docker "$CMD" "$@"
+fi
 HERE
 chmod +x "$TMP_DIR/$BASE_SCRIPT"
 
 # Create soft link
 printf '%s\n' "$RUN_TOOLS" \
-    | sed -E -e 's/ +/\n/g' -e '/^$/d' \
-    | xargs -i ln -s "$TMP_DIR/$BASE_SCRIPT" "$TMP_DIR/{}"
+  | sed -E -e 's/ +/\n/g' -e '/^$/d' \
+  | xargs -i ln -s "$TMP_DIR/$BASE_SCRIPT" "$TMP_DIR/{}"
+
+shift
 
 # Run Bash
+if [ -n "$*" ]; then
+
+bash --rcfile <(
+cat << HERE
+. ~/.bashrc
+PS1="($INPUT_PROFILE_NAME) \$PS1"
+PATH="$TMP_DIR:\$PATH"
+export RUN_ROOT_DIR="\$PWD"
+HERE
+) -ic "$*"
+
+else
+
 bash --rcfile <(
 cat << HERE
 . ~/.bashrc
@@ -62,6 +91,8 @@ PATH="$TMP_DIR:\$PATH"
 export RUN_ROOT_DIR="\$PWD"
 HERE
 )
+
+fi
 
 # Clean tmp dir
 rm -rf "$TMP_DIR"
